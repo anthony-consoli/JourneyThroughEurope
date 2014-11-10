@@ -52,4 +52,9 @@ public class JTEGameStateManager {
     {
         return isGameOn;
     }
+    
+    public void setGameOn()
+    {
+        isGameOn = true;
+    }        
 }

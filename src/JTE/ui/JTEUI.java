@@ -214,7 +214,7 @@ public class JTEUI extends Pane {
         
         
         GridPane playerGrid = new GridPane();
-        Image flagImg1 = loadImage("flag_red");
+        Image flagImg1 = loadImage("flag_red.png");
         
         HBox[] boxes = new HBox[6]; 
         
@@ -280,49 +280,86 @@ public class JTEUI extends Pane {
         
     }
 
-    private void initGameScreen() {
+    public void initGameScreen() {
         
         //CLEAR SETUP OR SPLASH SCREEN
         mainPane.setCenter(null);
+        initHistoryScreen();
         
         StackPane gamePlayPane = new StackPane();
         SplitPane gameSplitPane = new SplitPane();
         FlowPane  gameFlowPane = new FlowPane();
         ToolBar   gameToolBar = new ToolBar();
-        Label     gamePlayerLabel = new Label("Player 1");
+        Label     gamePlayerLabel = new Label("Player 1                 ");
         Pane      gameCardPane = new Pane();
         Pane      rightSidePane = new Pane();
         AnchorPane gameBoardPane = new AnchorPane();
-        Image q1Img = new Image("file:img/gameplay_AC14");
+        Image q1Img = loadImage("gameplay_AC14.jpg");
         ImageView gameBoardImg = new ImageView();
         gameBoardImg.setImage(q1Img);
+       // gameBoardImg.setPreserveRatio(true);
+        gameBoardImg.setSmooth(true);
+      //  gameBoardImg.setScaleX(.3);
+        gameBoardImg.fitWidthProperty().bind(rightSidePane.widthProperty());
+        gameBoardImg.fitHeightProperty().bind(rightSidePane.heightProperty());
         VBox rightSidePanel = new VBox();
         Label playerTurnLabel = new Label("Player 1 Turn");
-        Image dieImg = new Image("file:img/die_5");
+        Image dieImg = loadImage("die_5.jpg");
         ImageView dieImage = new ImageView();
         dieImage.setImage(dieImg);
+        
+        GridPane quadControl = new GridPane();
+        Button q1 = new Button("Q1");
+        Button q2 = new Button("Q2");
+        Button q3 = new Button("Q3");
+        Button q4 = new Button("Q4");
+        
+        //Add Quadrant Control Boxes to the Grid
+        quadControl.add(q1, 0,0);
+        quadControl.add(q2, 1, 0);
+        quadControl.add(q3, 0,1);
+        quadControl.add(q4, 1, 1);
+        
         VBox buttonBox = new VBox();
+       
+        //CREATE HISTORY BUTTON AND HANDLER
         Button historyButton = new Button("Game History");
+        historyButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent e) {
+                eventHandler.respondToSwitchScreenRequest(JTEUIState.VIEW_HISTORY_STATE);
+            }
+        });  
+        
+        //CREATE ABOUT BUTTON AND HANDLER
         Button aboutButton = new Button("About JTE");
+        aboutButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent e) {
+                eventHandler.respondToSwitchScreenRequest(JTEUIState.VIEW_ABOUT_STATE);
+            }
+        });  
         
         //ADD BUTTONS TO HBOX
         buttonBox.getChildren().add(historyButton);
         buttonBox.getChildren().add(aboutButton);
         
         //CREATE RIGHT SIDE PANEL
-        rightSidePanel.getChildren().addAll(playerTurnLabel, dieImage, buttonBox);
+        rightSidePanel.getChildren().addAll(playerTurnLabel, dieImage, quadControl, buttonBox);
         
         gameBoardPane.getChildren().add(gameBoardImg);
-        rightSidePane.getChildren().addAll(gameBoardPane, rightSidePanel);
+        rightSidePane.getChildren().addAll(gameBoardPane);
         
         gameToolBar.getItems().add(gamePlayerLabel);
+
         gameFlowPane.getChildren().addAll(gameToolBar, gameCardPane);
         
-        gameSplitPane.getItems().addAll(gameFlowPane, rightSidePane);
-        
+        gameSplitPane.getItems().addAll(gameFlowPane, rightSidePane, rightSidePanel);
+        gameSplitPane.setDividerPositions(0.2f, 0.8f, 0.9f);
         
         gamePlayPane.getChildren().add(gameSplitPane);
         
+        gsm.setGameOn();
         mainPane.setCenter(gamePlayPane);
         
         
@@ -330,7 +367,22 @@ public class JTEUI extends Pane {
     }
 
     private void initHistoryScreen() {
+        
+              
+        BorderPane historyPane = new BorderPane();
+        Label historyLabel = new Label("Game History");
+        historyPane.setTop(historyLabel);
+        
+        Button backButton = new Button("Back");
+        backButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent e) {
+                eventHandler.respondToBackRequest();
+            }
+        });
 
+        historyPane.setBottom(backButton);
+        mainPane.setCenter(historyPane);
     }
 
     private void initAboutScreen() {
@@ -379,7 +431,7 @@ public class JTEUI extends Pane {
                 initSplashScreen();
                 break;
             case VIEW_HISTORY_STATE:
-                mainPane.setCenter(historyPane);
+                initHistoryScreen();
                 break;
             case GAME_SETUP_STATE:
                 initSetupScreen();
@@ -396,12 +448,16 @@ public class JTEUI extends Pane {
         RadioButton playerChoice = new RadioButton("Player");
         playerChoice.setToggleGroup(group);
         playerChoice.setSelected(true);
-        RadioButton cpuChoice = new RadioButton("Computer");
+        RadioButton cpuChoice = new RadioButton("CPU");
         cpuChoice.setToggleGroup(group);
         
         HBox gridBox = new HBox();
         ImageView flag = new ImageView();
         flag.setImage(imageName);
+        flag.setFitWidth(25);
+        flag.setPreserveRatio(true);
+        flag.setSmooth(true);
+        flag.setCache(true);
         Label nameLabel = new Label("Name:");
         TextField nameText = new TextField();
         VBox nameVBox = new VBox();

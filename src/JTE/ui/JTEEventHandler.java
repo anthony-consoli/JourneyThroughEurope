@@ -67,10 +67,16 @@ public class JTEEventHandler {
     {
         if(!ui.getGSM().isGameInProgess())
             ui.initSplashScreen();
-            
+        else
+            ui.initGameScreen();
     }
     
     public void respondToQuadrantRequest()
+    {
+        
+    }        
+    
+    public void respondToHistoryRequest()
     {
         
     }        

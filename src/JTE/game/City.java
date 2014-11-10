@@ -5,10 +5,16 @@
  */
 package JTE.game;
 
+import javafx.scene.shape.Circle;
+
 /**
  *
  * @author Anthony
  */
-public class City {
+public class City extends Circle {
+ 
+ public City(){
+     
+ }   
     
 }
