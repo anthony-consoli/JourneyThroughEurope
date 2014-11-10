@@ -7,6 +7,7 @@ package JTE.ui;
 
 import JTE.game.JTEGameStateManager;
 import java.util.ArrayList;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -16,15 +17,22 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
+import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import javafx.beans.value.ChangeListener;
+import javafx.scene.control.SplitPane;
+import javafx.scene.control.ToolBar;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.StackPane;
 import journeythrougheurope.JourneyThroughEurope.JTEPropertyType;
 import properties_manager.PropertiesManager;
 
@@ -118,6 +126,7 @@ public class JTEUI extends Pane {
         
         //ADD THE TITLE LABEL FOR THE GAME
         Label titleText = new Label("Journey Through Europe");
+        titleText.setStyle("-fx-font-size: 48");
         splashPane.setTop(titleText);
         splashPane.setAlignment(titleText, Pos.TOP_CENTER);
 
@@ -203,6 +212,41 @@ public class JTEUI extends Pane {
         ChoiceBox cb = new ChoiceBox(FXCollections.observableArrayList(
         "1", "2", "3", "4", "5", "6"));
         
+        
+        GridPane playerGrid = new GridPane();
+        Image flagImg1 = loadImage("flag_red");
+        
+        HBox[] boxes = new HBox[6]; 
+        
+        boxes[0] = createSetupSelection(flagImg1);
+        boxes[1] = createSetupSelection(flagImg1);
+        boxes[2] = createSetupSelection(flagImg1);
+        boxes[3] = createSetupSelection(flagImg1);
+        boxes[4] = createSetupSelection(flagImg1);
+        boxes[5] = createSetupSelection(flagImg1);
+        
+        playerGrid.add(boxes[0], 0, 0);
+        playerGrid.add(boxes[1], 1, 0);
+        playerGrid.add(boxes[2], 2, 0);
+        playerGrid.add(boxes[3], 0, 1);
+        playerGrid.add(boxes[4], 1, 1);
+        playerGrid.add(boxes[5], 2, 1);
+        
+        for(int i = 0; i<boxes.length; i++)
+            boxes[i].setStyle("-fx-border-color: black;"
+                    + "-fx-border-style: solid;");
+        
+        cb.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
+                 public void changed(ObservableValue ov,
+                         Number value, Number new_value) {
+                    for(int i = 5; i > (int)new_value; i--)
+                        boxes[i].setVisible(false);
+                    for(int i = 0; i<(int)new_value+1;i++)
+                        boxes[i].setVisible(true);
+                                    
+                 }
+             });
+        
         //GO BUTTON THAT STARTS JTE GAME
         Button goBtn = new Button("Go!");
         goBtn.setOnAction(new EventHandler<ActionEvent>() {
@@ -220,13 +264,15 @@ public class JTEUI extends Pane {
 
         
 
-        //CREATE RADIO BUTTONS FOR PLAYER/COMPUTER CHOICE
-        final ToggleGroup group = new ToggleGroup();
-        RadioButton playerChoice = new RadioButton("Player");
-        playerChoice.setToggleGroup(group);
-        playerChoice.setSelected(true);
-        RadioButton cpuChoice = new RadioButton("Computer");
-        cpuChoice.setToggleGroup(group);
+
+
+
+        
+
+        
+        setupPane.setCenter(playerGrid);
+        
+        
         
        
         //DISPLAY SETUP PANE IN THE MAIN PANE
@@ -238,6 +284,47 @@ public class JTEUI extends Pane {
         
         //CLEAR SETUP OR SPLASH SCREEN
         mainPane.setCenter(null);
+        
+        StackPane gamePlayPane = new StackPane();
+        SplitPane gameSplitPane = new SplitPane();
+        FlowPane  gameFlowPane = new FlowPane();
+        ToolBar   gameToolBar = new ToolBar();
+        Label     gamePlayerLabel = new Label("Player 1");
+        Pane      gameCardPane = new Pane();
+        Pane      rightSidePane = new Pane();
+        AnchorPane gameBoardPane = new AnchorPane();
+        Image q1Img = new Image("file:img/gameplay_AC14");
+        ImageView gameBoardImg = new ImageView();
+        gameBoardImg.setImage(q1Img);
+        VBox rightSidePanel = new VBox();
+        Label playerTurnLabel = new Label("Player 1 Turn");
+        Image dieImg = new Image("file:img/die_5");
+        ImageView dieImage = new ImageView();
+        dieImage.setImage(dieImg);
+        VBox buttonBox = new VBox();
+        Button historyButton = new Button("Game History");
+        Button aboutButton = new Button("About JTE");
+        
+        //ADD BUTTONS TO HBOX
+        buttonBox.getChildren().add(historyButton);
+        buttonBox.getChildren().add(aboutButton);
+        
+        //CREATE RIGHT SIDE PANEL
+        rightSidePanel.getChildren().addAll(playerTurnLabel, dieImage, buttonBox);
+        
+        gameBoardPane.getChildren().add(gameBoardImg);
+        rightSidePane.getChildren().addAll(gameBoardPane, rightSidePanel);
+        
+        gameToolBar.getItems().add(gamePlayerLabel);
+        gameFlowPane.getChildren().addAll(gameToolBar, gameCardPane);
+        
+        gameSplitPane.getItems().addAll(gameFlowPane, rightSidePane);
+        
+        
+        gamePlayPane.getChildren().add(gameSplitPane);
+        
+        mainPane.setCenter(gamePlayPane);
+        
         
 
     }
@@ -300,6 +387,37 @@ public class JTEUI extends Pane {
             default:
         }
     }
+    
+    public HBox createSetupSelection(Image imageName)
+    {
+        
+        //CREATE RADIO BUTTONS FOR PLAYER/COMPUTER CHOICE
+        final ToggleGroup group = new ToggleGroup();
+        RadioButton playerChoice = new RadioButton("Player");
+        playerChoice.setToggleGroup(group);
+        playerChoice.setSelected(true);
+        RadioButton cpuChoice = new RadioButton("Computer");
+        cpuChoice.setToggleGroup(group);
+        
+        HBox gridBox = new HBox();
+        ImageView flag = new ImageView();
+        flag.setImage(imageName);
+        Label nameLabel = new Label("Name:");
+        TextField nameText = new TextField();
+        VBox nameVBox = new VBox();
+        VBox imageVBox = new VBox();
+        VBox selectVBox = new VBox();
+        imageVBox.getChildren().add(flag);
+        selectVBox.getChildren().add(playerChoice);
+        selectVBox.getChildren().add(cpuChoice);
+        nameVBox.getChildren().add(nameLabel);
+        nameVBox.getChildren().add(nameText);
+        gridBox.getChildren().add(imageVBox);
+        gridBox.getChildren().add(selectVBox);
+        gridBox.getChildren().add(nameVBox);
+        
+        return gridBox;
+    }        
     
     public Image loadImage(String imageName) 
     {
