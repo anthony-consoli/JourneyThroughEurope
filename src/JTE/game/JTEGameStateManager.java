@@ -11,11 +11,13 @@ package JTE.game;
  */
 
 import JTE.ui.JTEUI;
+import java.util.HashMap;
 
 public class JTEGameStateManager {
     
     
     JTEUI ui;
+    //JTEGameData gameData = new JTEGameData();
     private boolean isGameOn = false;
     
     public JTEGameStateManager(JTEUI initUI)
@@ -56,5 +58,7 @@ public class JTEGameStateManager {
     public void setGameOn()
     {
         isGameOn = true;
-    }        
+    }   
+    
+
 }

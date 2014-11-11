@@ -10,6 +10,7 @@ package JTE.ui;
  * @author Anthony
  */
 
+import JTE.game.City;
 import JTE.ui.JTEUI.JTEUIState;
 
 public class JTEEventHandler {
@@ -41,7 +42,12 @@ public class JTEEventHandler {
         //FOR HW5 I WILL JUST BE CHANGING THE WORKSPACE TO THE GAMEPLAY
         //SCREEN
         ui.changeWorkspace(JTEUIState.PLAY_GAME_STATE);
-    }   
+    } 
+    
+    public void respondToCityRequest()
+    {
+        
+    }        
     
     public void respondToLoadGameRequest()
     {

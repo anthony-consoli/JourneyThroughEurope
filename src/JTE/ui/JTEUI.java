@@ -5,8 +5,10 @@
  */
 package JTE.ui;
 
+import JTE.game.City;
 import JTE.game.JTEGameStateManager;
 import java.util.ArrayList;
+import java.util.HashMap;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
@@ -35,6 +37,9 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.StackPane;
 import journeythrougheurope.JourneyThroughEurope.JTEPropertyType;
 import properties_manager.PropertiesManager;
+import JTE.file.JTEFileLoader;
+import java.io.File;
+
 
 /**
  *
@@ -87,12 +92,20 @@ public class JTEUI extends Pane {
     private JTEDocumentManager docManager;
 
     JTEGameStateManager gsm;
+    JTEFileLoader fileLoader;
+    
+    File schemaFile = new File("data/PathXLevelSchema.xsd");
+    //CITY XML FILE
+    File citiesFile = new File("data/Cali.xml");
+    
+    private HashMap<String, City> cities;
 
     public JTEUI() {
         gsm = new JTEGameStateManager(this);
         eventHandler = new JTEEventHandler(this);
         errorHandler = new JTEErrorHandler(primaryStage);
         docManager = new JTEDocumentManager(this);
+        fileLoader = new JTEFileLoader(schemaFile);
         initMainPane();
         initAboutScreen();
         initSplashScreen();
@@ -300,8 +313,8 @@ public class JTEUI extends Pane {
        // gameBoardImg.setPreserveRatio(true);
         gameBoardImg.setSmooth(true);
       //  gameBoardImg.setScaleX(.3);
-        gameBoardImg.fitWidthProperty().bind(rightSidePane.widthProperty());
-        gameBoardImg.fitHeightProperty().bind(rightSidePane.heightProperty());
+      //  gameBoardImg.fitWidthProperty().bind(rightSidePane.widthProperty());
+       // gameBoardImg.fitHeightProperty().bind(rightSidePane.heightProperty());
         VBox rightSidePanel = new VBox();
         Label playerTurnLabel = new Label("Player 1 Turn");
         Image dieImg = loadImage("die_5.jpg");
@@ -347,7 +360,44 @@ public class JTEUI extends Pane {
         //CREATE RIGHT SIDE PANEL
         rightSidePanel.getChildren().addAll(playerTurnLabel, dieImage, quadControl, buttonBox);
         
+        Label cityLabel = new Label();
+        
+        
         gameBoardPane.getChildren().add(gameBoardImg);
+        gameBoardPane.getChildren().add(cityLabel);
+        //LOAD CITIES INTO QUADRANT
+        cities = fileLoader.loadCities(citiesFile);
+            
+
+        gameBoardPane.getChildren().add(cities.get("ABERDEEN"));
+        gameBoardPane.getChildren().add(cities.get("ARHUS"));
+        gameBoardPane.getChildren().add(cities.get("BELFAST"));
+        gameBoardPane.getChildren().add(cities.get("BERGEN"));
+        gameBoardPane.getChildren().add(cities.get("BIRMINGHAM"));
+        gameBoardPane.getChildren().add(cities.get("BREMEN"));
+        gameBoardPane.getChildren().add(cities.get("CORK"));
+        gameBoardPane.getChildren().add(cities.get("DUBLIN"));
+        gameBoardPane.getChildren().add(cities.get("FAROER"));
+        gameBoardPane.getChildren().add(cities.get("GLASGOW"));
+        gameBoardPane.getChildren().add(cities.get("GRONINGEN"));
+        gameBoardPane.getChildren().add(cities.get("HAMBURG"));
+        gameBoardPane.getChildren().add(cities.get("INVERNESS"));
+        gameBoardPane.getChildren().add(cities.get("KIEL"));
+        gameBoardPane.getChildren().add(cities.get("LEEDS"));
+        gameBoardPane.getChildren().add(cities.get("LIVERPOOL"));
+        gameBoardPane.getChildren().add(cities.get("NEWCASTLE"));
+        gameBoardPane.getChildren().add(cities.get("REYKJAVIK"));
+        gameBoardPane.getChildren().add(cities.get("SHETLAND ISLANDS"));
+        gameBoardPane.getChildren().add(cities.get("STAVANGER"));
+        
+        for(int i = 2;i<22;i++)
+        {
+            String tmp = gameBoardPane.getChildren().get(i).toString();
+            gameBoardPane.getChildren().get(i).setOnMouseClicked(mouseEvent -> {
+                cityLabel.setText(tmp);
+            });
+        }    
+        
         rightSidePane.getChildren().addAll(gameBoardPane);
         
         gameToolBar.getItems().add(gamePlayerLabel);
@@ -480,4 +530,6 @@ public class JTEUI extends Pane {
         Image img = new Image(ImgPath + imageName);
         return img;
     }
+    
+    
 }
