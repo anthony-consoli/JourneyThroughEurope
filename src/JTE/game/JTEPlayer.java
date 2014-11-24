@@ -61,6 +61,10 @@ public class JTEPlayer {
                 flag = loadSprite("flag_white.png");
                 break;
         }    
+        
+        currentCity = null;
+        currentX=0;
+        currentY=0;
     }
     
     public Image loadSprite(String imageName) 
@@ -69,4 +73,35 @@ public class JTEPlayer {
         return img;
     }
     
+    public void setCurrentCity(City c)
+    {
+        currentCity = c;
+        currentX = c.getX();
+        currentY = c.getY();
+    }        
+    
+    public City getCurrentCity()
+    {
+        return currentCity;
+    }        
+    
+    public double getCurrentX()
+    {
+        return currentX;
+    }        
+    
+    public double getCurrentY()
+    {
+        return currentY;
+    }        
+ 
+    public Image getSprite()
+    {
+        return sprite;
+    }        
+    
+    public Image getFlag()
+    {
+        return flag;
+    }        
 }

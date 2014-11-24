@@ -12,6 +12,7 @@ package JTE.ui;
 
 import JTE.game.City;
 import JTE.game.JTEGameStateManager;
+import JTE.game.JTEPlayer;
 import JTE.ui.JTEUI.JTEUIState;
 
 public class JTEEventHandler {
@@ -47,9 +48,12 @@ public class JTEEventHandler {
         ui.changeWorkspace(JTEUIState.PLAY_GAME_STATE);
     } 
     
-    public void respondToCityRequest(City c, String str, double x, double y)
+    public void respondToCityRequest(City c, JTEPlayer player, String str, double x, double y)
     {
-        ui.updatePlayerPosition(c, str, x, y);
+        if(player.getCurrentCity().getLandNeighbors().contains(c) || player.getCurrentCity().getSeaNeighbors().contains(c))
+        {
+            ui.updatePlayerPosition(c, player,str, x, y);
+        }    
     }        
     
     public void respondToLoadGameRequest()
@@ -85,9 +89,9 @@ public class JTEEventHandler {
         
     }        
     
-    public void respondToQuadrantRequest(JTEUI.JTEQuadState state)
+    public void respondToQuadrantRequest(int quadNum)
     {
-        ui.changeQuadrant(state);
+        ui.changeQuadrant(quadNum);
             
     }        
 }

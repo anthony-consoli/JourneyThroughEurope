@@ -52,6 +52,16 @@ public class City extends Circle {
      landNeighbors = land;
  }        
  
+ public ArrayList<City> getLandNeighbors()
+ {
+     return landNeighbors;
+ }        
+ 
+ public ArrayList<City> getSeaNeighbors()
+ {
+     return seaNeighbors;
+ }        
+ 
  public String getColor()
  {
      return color;
