@@ -46,7 +46,7 @@ public class JTEFileLoader {
                     
                 // FIRST GET THE REGIONS LIST
                 Node citiesListNode = doc.getElementsByTagName("cities").item(0);
-                cities = new City[179];          
+                cities = new City[180];          
                             
                 // AND THEN GO THROUGH AND ADD ALL THE LISTED REGIONS
                 ArrayList<Node> intersectionsList = xmlUtil.getChildNodesWithName(citiesListNode, "city");

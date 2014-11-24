@@ -69,7 +69,7 @@
           <city quad="3" color="green" name="GENEVE" x="1595" y="833"/>
           <city quad="3" color="green" name="KASSEL" x="1905" y="181"/>
           <city quad="3" color="green" name="KOLN" x="1685" y="199"/>
-          <city quad="3" color="green" name="LE HAVRE" x="1116" y="367"/>
+          <city quad="3" color="green" name="LE_HAVRE" x="1116" y="367"/>
           <city quad="3" color="green" name="LILLE" x="1359" y="277"/>
           <city quad="3" color="green" name="LIMOGES" x="1165" y="849"/>
           <city quad="3" color="green" name="LUXEMBOURG" x="1625" y="385"/>
@@ -112,7 +112,7 @@
           <city quad="3" color="yellow" name="PALMA_MALLORCA" x="1235" y="1660"/>
           <city quad="3" color="yellow" name="PORTO" x="141" y="1308"/>
           <city quad="3" color="yellow" name="SANTANDER" x="645" y="1100"/>
-          <city quad="3" color="yellow" name="SAN SEBASTIAN" x="803" y="1153"/>
+          <city quad="3" color="yellow" name="SAN_SEBASTIAN" x="803" y="1153"/>
           <city quad="3" color="yellow" name="SASSARI" x="1837" y="1535"/>
           <city quad="3" color="yellow" name="SEVILLA" x="311" y="1826"/>
           <city quad="3" color="yellow" name="TORINO" x="1763" y="983"/>
@@ -143,7 +143,7 @@
           <city quad="4" color="green" name="MUNCHEN" x="105" y="580"/>
           <city quad="4" color="green" name="NURNBERG" x="79" y="411"/>
           <city quad="4" color="green" name="ODESSA" x="1795" y="523"/>
-		  <city quad="4" color="green" name="PATRAS" x="1185" y="1761"/>
+		  <city quad="4" color="green" name="PATRAI" x="1185" y="1761"/>
           <city quad="4" color="green" name="PLZEN" x="250" y="360"/>
           <city quad="4" color="green" name="PRAHA" x="370" y="320"/>
           <city quad="4" color="green" name="SALZBURG" x="250" y="615"/>

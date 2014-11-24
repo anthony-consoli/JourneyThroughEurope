@@ -5,7 +5,7 @@
  */
 package JTE.game;
 
-import java.awt.Color;
+import java.util.ArrayList;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
 
@@ -21,7 +21,12 @@ public class City extends Circle {
     private double yPos;
     private int quad;
     private String color;
+    private ArrayList<City> landNeighbors;
+    private ArrayList<City> seaNeighbors;
     
+ public City(){
+     
+ }
     
  public City(String name, String col, double centerX, double centerY, int q)
  {
@@ -31,8 +36,21 @@ public class City extends Circle {
      yPos = centerY;
      quad = q;
      color = col;
+     landNeighbors = new ArrayList<City>();
+     seaNeighbors = new ArrayList<City>();
+     
      
  }   
+ 
+ public void addSeaNeighbors(ArrayList<City> sea)
+ {
+     seaNeighbors = sea;
+ }        
+ 
+ public void addLandNeighbors(ArrayList<City> land)
+ {
+     landNeighbors = land;
+ }        
  
  public String getColor()
  {

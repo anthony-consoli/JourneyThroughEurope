@@ -28,6 +28,9 @@ public class JTEPlayer {
     ImageView playerPiece;
     ImageView flagPiece;
     boolean cpu;
+    City currentCity;
+    double currentX;
+    double currentY;
     
     public JTEPlayer(int playNum, boolean cmp)
     {
