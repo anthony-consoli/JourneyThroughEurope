@@ -11,6 +11,7 @@ package JTE.ui;
  */
 
 import JTE.game.City;
+import JTE.game.JTEGameStateManager;
 import JTE.ui.JTEUI.JTEUIState;
 
 public class JTEEventHandler {
@@ -36,17 +37,19 @@ public class JTEEventHandler {
         ui.changeWorkspace(uiState);
     }   
     
-    public void respondToNewGameRequest()
+    public void respondToNewGameRequest(int p)
     {
         //ALOT OF DIFFERENT THINGS TO DO TO ACTUALLY SET UP NEW GAME
         //FOR HW5 I WILL JUST BE CHANGING THE WORKSPACE TO THE GAMEPLAY
         //SCREEN
+        JTEGameStateManager gsm = ui.getGSM();
+        gsm.makeNewGame(p);
         ui.changeWorkspace(JTEUIState.PLAY_GAME_STATE);
     } 
     
-    public void respondToCityRequest()
+    public void respondToCityRequest(City c, String str, double x, double y)
     {
-        
+        ui.updatePlayerPosition(c, str, x, y);
     }        
     
     public void respondToLoadGameRequest()
@@ -77,13 +80,14 @@ public class JTEEventHandler {
             ui.initGameScreen();
     }
     
-    public void respondToQuadrantRequest()
+    public void respondToHistoryRequest()
     {
         
     }        
     
-    public void respondToHistoryRequest()
+    public void respondToQuadrantRequest(JTEUI.JTEQuadState state)
     {
-        
+        ui.changeQuadrant(state);
+            
     }        
 }

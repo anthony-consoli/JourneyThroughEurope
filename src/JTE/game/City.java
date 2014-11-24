@@ -17,18 +17,53 @@ public class City extends Circle {
  
     private double radius = 6.0;
     private String cityName;
+    private double xPos;
+    private double yPos;
+    private int quad;
+    private String color;
     
- public City(String name, double centerX, double centerY)
+    
+ public City(String name, String col, double centerX, double centerY, int q)
  {
      super(centerX, centerY, 6.0, Paint.valueOf("#FF0000"));
-     String cityName = name;
+     cityName = name;
+     xPos = centerX;
+     yPos = centerY;
+     quad = q;
+     color = col;
      
  }   
+ 
+ public String getColor()
+ {
+     return color;
+ }        
+ 
+ public String getName()
+ {
+     return cityName;
+ }       
+ 
+ public double getX()
+ {
+     return xPos;
+ }       
+ 
+ public double getY()
+ {
+     return yPos;
+ }       
+ public int getQuad()
+ {
+     return quad;
+ }       
+ 
 @Override   
  public String toString()
  {
      return cityName;
  }        
+ 
  
         
  

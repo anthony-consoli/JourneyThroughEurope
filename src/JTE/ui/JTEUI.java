@@ -8,7 +8,6 @@ package JTE.ui;
 import JTE.game.City;
 import JTE.game.JTEGameStateManager;
 import java.util.ArrayList;
-import java.util.HashMap;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
@@ -38,7 +37,10 @@ import javafx.scene.layout.StackPane;
 import journeythrougheurope.JourneyThroughEurope.JTEPropertyType;
 import properties_manager.PropertiesManager;
 import JTE.file.JTEFileLoader;
+import JTE.game.Card;
 import java.io.File;
+import javafx.animation.TranslateTransition;
+import javafx.util.Duration;
 
 
 /**
@@ -52,10 +54,22 @@ public class JTEUI extends Pane {
         SPLASH_SCREEN_STATE, GAME_SETUP_STATE, PLAY_GAME_STATE, VIEW_ABOUT_STATE, VIEW_HISTORY_STATE,
         VIEW_FLIGHT_STATE
     }
+    
+    public enum JTEQuadState{
+        
+        QUAD_1, QUAD_2, QUAD_3, QUAD_4;
+    }
+    
+    public enum JTEPlayerState{
+        PLAYER_1, PLAYER_2, PLAYER_3, PLAYER_4, PLAYER_5, PLAYER_6;
+    }
 
     // mainStage
     private Stage primaryStage;
 
+    // Image path
+    private String ImgPath = "file:img/";
+    
     // mainPane
     private BorderPane mainPane;
     private BorderPane hmPane;
@@ -74,13 +88,29 @@ public class JTEUI extends Pane {
     
     //Game Screen Variables
     private Pane gamePane;
+    private AnchorPane gameBoardPane;
+    private StackPane gamePlayPane;
+    private SplitPane gameSplitPane;
+    private FlowPane  gameFlowPane;
+    private ToolBar   gameToolBar;
+    private Label     gamePlayerLabel;
+    private AnchorPane      gameCardPane;
+    private    Pane      rightSidePane;
+    Image q1Img = loadImage("gameplay_AC14.jpg");
+    Image q2Img = loadImage("gameplay_DF14.jpg");
+    Image q3Img = loadImage("gameplay_AC58.jpg");
+    Image q4Img = loadImage("gameplay_DF58.jpg");
+    private ImageView gameBoardImg;
+    private VBox rightSidePanel;
+    private Label playerTurnLabel;
+    private Image dieImg;
+    private ImageView dieImage;
     
 
     // Padding
     private Insets marginlessInsets;
 
-    // Image path
-    private String ImgPath = "file:img/";
+
 
     // mainPane weight && height
     private int paneWidth;
@@ -90,15 +120,39 @@ public class JTEUI extends Pane {
     private JTEEventHandler eventHandler;
     private JTEErrorHandler errorHandler;
     private JTEDocumentManager docManager;
+    
+    Label cityLabel;
 
     JTEGameStateManager gsm;
     JTEFileLoader fileLoader;
     
-    File schemaFile = new File("data/PathXLevelSchema.xsd");
+    File schemaFile = new File("data/JTESchema.xsd");
     //CITY XML FILE
-    File citiesFile = new File("data/Cali.xml");
+    File citiesFile = new File("data/JTE.xml");
     
-    private HashMap<String, City> cities;
+    //JUST FOR SPRITE TESTING / CARD TESTING
+       Image pic = loadImage("piece_black.png");
+       ImageView p1 = new ImageView(pic);   
+       double xPos = 25;
+       double yPos = 25;    
+       final double offsetX = pic.getWidth()/2 + 25;
+       final double offsetY = pic.getHeight()/2 + 40;
+       
+       Image firstCard = loadImage("red/ABERDEEN.jpg");
+       Image secondCard = loadImage("green/BASEL.jpg");
+       Image thirdCard = loadImage("yellow/ANCONA.jpg");
+       double yOff = 60;
+       double xOff = 8;
+
+       ImageView p2 = new ImageView(firstCard);
+       ImageView p3 = new ImageView(secondCard);
+       ImageView p4 = new ImageView(thirdCard);
+    
+       Thread one;
+    
+       
+       
+    private City[] cities;
 
     public JTEUI() {
         gsm = new JTEGameStateManager(this);
@@ -222,8 +276,7 @@ public class JTEUI extends Pane {
         //CREATE UPPER TOOLBAR FOR NUMBER OF PLAYERS
         HBox numHb = new HBox(5);
         Label numPlay = new Label("Players: ");
-        ChoiceBox cb = new ChoiceBox(FXCollections.observableArrayList(
-        "1", "2", "3", "4", "5", "6"));
+
         
         
         GridPane playerGrid = new GridPane();
@@ -249,6 +302,9 @@ public class JTEUI extends Pane {
             boxes[i].setStyle("-fx-border-color: black;"
                     + "-fx-border-style: solid;");
         
+        //NUMBER OF PLAYERS TO BE SELECTED
+        ChoiceBox cb = new ChoiceBox(FXCollections.observableArrayList(
+        "1", "2", "3", "4", "5", "6"));
         cb.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
                  public void changed(ObservableValue ov,
                          Number value, Number new_value) {
@@ -256,16 +312,20 @@ public class JTEUI extends Pane {
                         boxes[i].setVisible(false);
                     for(int i = 0; i<(int)new_value+1;i++)
                         boxes[i].setVisible(true);
-                                    
+                    
                  }
              });
         
-        //GO BUTTON THAT STARTS JTE GAME
+       
+        
+        //GO BUTTON THAT STARTS JTE GAME BASED ON PLAYER INFO SELECTED
         Button goBtn = new Button("Go!");
         goBtn.setOnAction(new EventHandler<ActionEvent>() {
         @Override
         public void handle(ActionEvent e) {
-             eventHandler.respondToNewGameRequest();
+            System.out.println(cb.getSelectionModel().selectedIndexProperty().getValue()+1);
+             eventHandler.respondToNewGameRequest(cb.getSelectionModel().selectedIndexProperty().getValue()+1);
+             
          }
         });
         
@@ -275,12 +335,7 @@ public class JTEUI extends Pane {
         numHb.getChildren().add(goBtn);
         setupPane.setTop(numHb);
 
-        
-
-
-
-
-        
+                
 
         
         setupPane.setCenter(playerGrid);
@@ -293,47 +348,67 @@ public class JTEUI extends Pane {
         
     }
 
-    public void initGameScreen() {
+    public void initGameScreen()  {
         
-        //CLEAR SETUP OR SPLASH SCREEN
-        mainPane.setCenter(null);
-        initHistoryScreen();
+       //CLEAR SETUP OR SPLASH SCREEN
+       mainPane.setCenter(null);
+       initHistoryScreen();
         
-        StackPane gamePlayPane = new StackPane();
-        SplitPane gameSplitPane = new SplitPane();
-        FlowPane  gameFlowPane = new FlowPane();
-        ToolBar   gameToolBar = new ToolBar();
-        Label     gamePlayerLabel = new Label("Player 1                 ");
-        Pane      gameCardPane = new Pane();
-        Pane      rightSidePane = new Pane();
-        AnchorPane gameBoardPane = new AnchorPane();
-        Image q1Img = loadImage("gameplay_AC14.jpg");
-        ImageView gameBoardImg = new ImageView();
-        gameBoardImg.setImage(q1Img);
-       // gameBoardImg.setPreserveRatio(true);
-        gameBoardImg.setSmooth(true);
-      //  gameBoardImg.setScaleX(.3);
-      //  gameBoardImg.fitWidthProperty().bind(rightSidePane.widthProperty());
-       // gameBoardImg.fitHeightProperty().bind(rightSidePane.heightProperty());
-        VBox rightSidePanel = new VBox();
-        Label playerTurnLabel = new Label("Player 1 Turn");
-        Image dieImg = loadImage("die_5.jpg");
-        ImageView dieImage = new ImageView();
-        dieImage.setImage(dieImg);
+       gamePlayPane = new StackPane();
+       gameSplitPane = new SplitPane();
+       gameFlowPane = new FlowPane();
+       gameToolBar = new ToolBar();
+       gamePlayerLabel = new Label("Player 1                 ");
+       gameCardPane = new AnchorPane();
+       rightSidePane = new Pane();
+       gameBoardPane = new AnchorPane();
+       gameBoardImg = new ImageView();
+       gameBoardImg.setImage(q1Img);
+       gameBoardImg.setSmooth(true);
+       rightSidePanel = new VBox();
+       playerTurnLabel = new Label("Player 1 Turn");
+       dieImg = loadImage("die_5.jpg");
+       dieImage = new ImageView();
+       dieImage.setImage(dieImg);
         
-        GridPane quadControl = new GridPane();
-        Button q1 = new Button("Q1");
-        Button q2 = new Button("Q2");
-        Button q3 = new Button("Q3");
+       
+       //SET UP QUADRANT SELECTION BUTTONS
+       GridPane quadControl = new GridPane();
+       Button q1 = new Button("Q1");
+       q1.setOnAction(new EventHandler<ActionEvent>() {
+           @Override
+           public void handle(ActionEvent e) {
+               eventHandler.respondToQuadrantRequest(JTEQuadState.QUAD_1);
+           }
+       });  
+       Button q2 = new Button("Q2");
+       q2.setOnAction(new EventHandler<ActionEvent>() {
+           @Override
+           public void handle(ActionEvent e) {
+               eventHandler.respondToQuadrantRequest(JTEQuadState.QUAD_2);
+           }
+        });  
+       Button q3 = new Button("Q3");
+       q3.setOnAction(new EventHandler<ActionEvent>() {
+           @Override
+            public void handle(ActionEvent e) {
+                eventHandler.respondToQuadrantRequest(JTEQuadState.QUAD_3);
+            }
+        });  
         Button q4 = new Button("Q4");
+        q4.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent e) {
+                eventHandler.respondToQuadrantRequest(JTEQuadState.QUAD_4);
+            }
+        });  
         
-        //Add Quadrant Control Boxes to the Grid
+        //ADD QUADRANT CONTROLS TO THE GRID
         quadControl.add(q1, 0,0);
         quadControl.add(q2, 1, 0);
         quadControl.add(q3, 0,1);
         quadControl.add(q4, 1, 1);
         
-        VBox buttonBox = new VBox();
        
         //CREATE HISTORY BUTTON AND HANDLER
         Button historyButton = new Button("Game History");
@@ -353,50 +428,68 @@ public class JTEUI extends Pane {
             }
         });  
         
-        //ADD BUTTONS TO HBOX
+        //CREATE ABOUT BUTTON AND HANDLER
+        Button flightButton = new Button("Flight Plan");
+        flightButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent e) {
+                eventHandler.respondToSwitchScreenRequest(JTEUIState.VIEW_ABOUT_STATE);
+            }
+        });
+        
+        //CREATE ABOUT BUTTON AND HANDLER
+        Button saveButton = new Button("Save");
+        aboutButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent e) {
+                eventHandler.respondToSwitchScreenRequest(JTEUIState.VIEW_ABOUT_STATE);
+            }
+        });
+        
+        //CREATE VBOX FOR BUTTONS
+        VBox buttonBox = new VBox();
+        //ADD BUTTONS TO VBOX
+        buttonBox.getChildren().add(flightButton);
         buttonBox.getChildren().add(historyButton);
         buttonBox.getChildren().add(aboutButton);
-        
-        //CREATE RIGHT SIDE PANEL
-        rightSidePanel.getChildren().addAll(playerTurnLabel, dieImage, quadControl, buttonBox);
-        
-        Label cityLabel = new Label();
+        buttonBox.getChildren().add(saveButton);
         
         
-        gameBoardPane.getChildren().add(gameBoardImg);
-        gameBoardPane.getChildren().add(cityLabel);
-        //LOAD CITIES INTO QUADRANT
-        cities = fileLoader.loadCities(citiesFile);
-            
+        
+        //TESTING LABEL TO DISPLAY CITY CLICKED
+        cityLabel = new Label("City");
+       
+        //ADD COMPONENTS TO RIGHT SIDE PANEL
+        rightSidePanel.getChildren().addAll(playerTurnLabel, dieImage, quadControl, buttonBox, cityLabel);
+        
 
-        gameBoardPane.getChildren().add(cities.get("ABERDEEN"));
-        gameBoardPane.getChildren().add(cities.get("ARHUS"));
-        gameBoardPane.getChildren().add(cities.get("BELFAST"));
-        gameBoardPane.getChildren().add(cities.get("BERGEN"));
-        gameBoardPane.getChildren().add(cities.get("BIRMINGHAM"));
-        gameBoardPane.getChildren().add(cities.get("BREMEN"));
-        gameBoardPane.getChildren().add(cities.get("CORK"));
-        gameBoardPane.getChildren().add(cities.get("DUBLIN"));
-        gameBoardPane.getChildren().add(cities.get("FAROER"));
-        gameBoardPane.getChildren().add(cities.get("GLASGOW"));
-        gameBoardPane.getChildren().add(cities.get("GRONINGEN"));
-        gameBoardPane.getChildren().add(cities.get("HAMBURG"));
-        gameBoardPane.getChildren().add(cities.get("INVERNESS"));
-        gameBoardPane.getChildren().add(cities.get("KIEL"));
-        gameBoardPane.getChildren().add(cities.get("LEEDS"));
-        gameBoardPane.getChildren().add(cities.get("LIVERPOOL"));
-        gameBoardPane.getChildren().add(cities.get("NEWCASTLE"));
-        gameBoardPane.getChildren().add(cities.get("REYKJAVIK"));
-        gameBoardPane.getChildren().add(cities.get("SHETLAND ISLANDS"));
-        gameBoardPane.getChildren().add(cities.get("STAVANGER"));
         
-        for(int i = 2;i<22;i++)
+        //THIS CODE WILL HAVE TO CHANGE TODO.....
+        gameBoardPane.getChildren().add(gameBoardImg);
+       
+        
+
+        //LOAD ALL CITIES INTO BOARD
+        cities = gsm.getGameInProgress().getCities();
+        for(int i=0;i<cities.length;i++)
         {
-            String tmp = gameBoardPane.getChildren().get(i).toString();
-            gameBoardPane.getChildren().get(i).setOnMouseClicked(mouseEvent -> {
-                cityLabel.setText(tmp);
-            });
+            gameBoardPane.getChildren().add(cities[i]);
+            //THIS WILL SET THE CIRCULAR CITY OBJECTS TRANSPARENT
+            cities[i].setOpacity(0);
         }    
+        
+        for(int i=1;i<cities.length+1;i++)
+        {
+          String tmpStr = gameBoardPane.getChildren().get(i).toString();   
+          City tmp = (City) gameBoardPane.getChildren().get(i);
+          tmp.setOnMouseClicked(mouseEvent -> {
+          eventHandler.respondToCityRequest(tmp, tmpStr, mouseEvent.getX(), mouseEvent.getY());
+
+          });            
+        }    
+        
+        //TESTING
+        initPlayerSprites();
         
         rightSidePane.getChildren().addAll(gameBoardPane);
         
@@ -411,10 +504,25 @@ public class JTEUI extends Pane {
         
         gsm.setGameOn();
         mainPane.setCenter(gamePlayPane);
-        
-        
+
 
     }
+   
+    
+    public void initPlayerSprites()
+    {
+
+       
+       gameBoardPane.getChildren().add(p1);
+       p1.setX(xPos);
+       p1.setY(yPos); 
+        
+        
+    }        
+    
+
+        
+        
 
     private void initHistoryScreen() {
         
@@ -530,6 +638,122 @@ public class JTEUI extends Pane {
         Image img = new Image(ImgPath + imageName);
         return img;
     }
+      
+    public void changeQuadrant(JTEQuadState state)
+    {
+        
+        if(state == JTEQuadState.QUAD_1)
+        {
+            gameBoardImg.setImage(q1Img);
+            for(int i=0; i<cities.length;i++)
+            {
+              switch(cities[i].getQuad())  
+              {
+                  case 1:
+                      gameBoardPane.getChildren().get(i+1).setVisible(true);
+                      break;
+                  case 2:
+                      gameBoardPane.getChildren().get(i+1).setVisible(false);
+                      break;
+                  case 3:
+                      gameBoardPane.getChildren().get(i+1).setVisible(false);
+                      break;
+                  case 4:
+                      gameBoardPane.getChildren().get(i+1).setVisible(false);
+                      break;
+              }    
+            }    
+              
+
+        }
+        else if(state == JTEQuadState.QUAD_2)
+        {
+            gameBoardImg.setImage(q2Img);
+            
+            for(int i=0; i<cities.length;i++)
+            {
+              switch(cities[i].getQuad())  
+              {
+                  case 1:
+                      gameBoardPane.getChildren().get(i+1).setVisible(false);
+                      break;
+                  case 2:
+                      gameBoardPane.getChildren().get(i+1).setVisible(true);
+                      break;
+                  case 3:
+                      gameBoardPane.getChildren().get(i+1).setVisible(false);
+                      break;
+                  case 4:
+                      gameBoardPane.getChildren().get(i+1).setVisible(false);
+                      break;
+              }    
+            } 
+            
+        } 
+        else if(state == JTEQuadState.QUAD_3)
+        {
+            gameBoardImg.setImage(q3Img);
+            
+            for(int i=0; i<cities.length;i++)
+            {
+              switch(cities[i].getQuad())  
+              {
+                  case 1:
+                      gameBoardPane.getChildren().get(i+1).setVisible(false);
+                      break;
+                  case 2:
+                      gameBoardPane.getChildren().get(i+1).setVisible(false);
+                      break;
+                  case 3:
+                      gameBoardPane.getChildren().get(i+1).setVisible(true);
+                      break;
+                  case 4:
+                      gameBoardPane.getChildren().get(i+1).setVisible(false);
+                      break;
+              }    
+            } 
+        } 
+        else if(state == JTEQuadState.QUAD_4)
+        {
+            gameBoardImg.setImage(q4Img);
+            
+            for(int i=0; i<cities.length;i++)
+            {
+              switch(cities[i].getQuad())  
+              {
+                  case 1:
+                      gameBoardPane.getChildren().get(i+1).setVisible(false);
+                      break;
+                  case 2:
+                      gameBoardPane.getChildren().get(i+1).setVisible(false);
+                      break;
+                  case 3:
+                      gameBoardPane.getChildren().get(i+1).setVisible(false);
+                      break;
+                  case 4:
+                      gameBoardPane.getChildren().get(i+1).setVisible(true);
+                      break;
+              }    
+            } 
+        } 
+    }        
     
-    
+    public void updatePlayerPosition(City c, String tempStr, double x, double y)
+    {        
+        cityLabel.setText(tempStr);
+        double xDest = x - offsetX;
+        double yDest = y - offsetY;
+        TranslateTransition translateTransition1 = new TranslateTransition(Duration.millis(1000), p1);
+        translateTransition1.setFromX(xPos);
+        translateTransition1.setFromY(yPos);
+        translateTransition1.setToX(xDest);
+        translateTransition1.setToY(yDest);
+        translateTransition1.play();
+        updatePos(xDest, yDest);
+    }
+      public void updatePos(double x, double y)
+  {
+      xPos = x;
+      yPos = y;
+  }        
 }

@@ -26,7 +26,7 @@ public class JTEFileLoader {
     private File levelSchema;
     
     //HASHMAP FOR CITIES
-    private HashMap<String, City> cities = new HashMap();
+    private City[] cities;
     
         public JTEFileLoader(File initCitySchema)
     {
@@ -36,7 +36,7 @@ public class JTEFileLoader {
         // WE'LL USE THE SCHEMA FILE TO VALIDATE THE XML FILES
         levelSchema = initCitySchema;
     }
-        public HashMap<String, City> loadCities(File cityFile)
+        public City[] loadCities(File cityFile)
         {
             try
             {
@@ -45,28 +45,31 @@ public class JTEFileLoader {
     
                     
                 // FIRST GET THE REGIONS LIST
-                Node citiesListNode = doc.getElementsByTagName("intersections").item(0);
-                HashMap<String,City>  cities = new HashMap();          
+                Node citiesListNode = doc.getElementsByTagName("cities").item(0);
+                cities = new City[179];          
                             
                 // AND THEN GO THROUGH AND ADD ALL THE LISTED REGIONS
-                ArrayList<Node> intersectionsList = xmlUtil.getChildNodesWithName(citiesListNode, "intersection");
-              //  System.out.println(intersectionsList.size());
+                ArrayList<Node> intersectionsList = xmlUtil.getChildNodesWithName(citiesListNode, "city");
+
                 for (int i = 0; i < intersectionsList.size(); i++)
                 {
                     // GET THEIR DATA FROM THE DOC
                     Node cityNode = intersectionsList.get(i);
                     NamedNodeMap cityAttributes = cityNode.getAttributes();
-                    String nameText = cityAttributes.getNamedItem("open").getNodeValue();
+                    //GET CARD COLOR
+                    String cardColor = cityAttributes.getNamedItem("color").getNodeValue();                    
+                    String nameText = cityAttributes.getNamedItem("name").getNodeValue();
                     String xText = cityAttributes.getNamedItem("x").getNodeValue();
+                    String quadText = cityAttributes.getNamedItem("quad").getNodeValue();
                     double x = Double.parseDouble(xText);
-                    x = (int)(x/3);
+                    x = (x*.33);
                     String yText = cityAttributes.getNamedItem("y").getNodeValue();
                     double y = Double.parseDouble(yText);
-                    y = (int)(y/3);
-            
-                     // NOW MAKE AND ADD THE INTERSECTION
-                    City newCity = new City(nameText,x, y);
-                    cities.put(nameText, newCity);
+                    y = (y*.33);
+                    int quad = Integer.parseInt(quadText);
+                     // NOW MAKE AND ADD THE CITY
+                    City newCity = new City(nameText, cardColor, x, y, quad);
+                    cities[i] = newCity;
                 }
                 
                 return cities;
