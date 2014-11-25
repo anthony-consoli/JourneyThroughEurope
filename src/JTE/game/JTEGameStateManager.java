@@ -20,8 +20,15 @@ public class JTEGameStateManager {
         GAME_NOT_STARTED, GAME_IN_PROGRESS, GAME_OVER
     }
     
+    public enum JTETurnState{
+        PLAYER_1, PLAYER_2, PLAYER_3, PLAYER_4, PLAYER_5,PLAYER_6
+    }
+    
     //STORES THE CURRENT STATE OF THIS GAME
     private JTEGameState currentGameState;
+    
+    //STORES CURRENT PLAYER STATE
+    private JTETurnState currentPlayerState;
     
     //WHEN THE STATE OF THE GAME CHANGES IT WILL NEED TO BE 
     //REFLECTED IN THE USER INTERFACE
@@ -33,6 +40,8 @@ public class JTEGameStateManager {
     private JTEFileLoader fileLoader;
     
     private boolean isGameOn = false;
+    
+    private JTEPlayer current;
     
     public JTEGameStateManager(JTEUI initUI)
     {
@@ -79,10 +88,22 @@ public class JTEGameStateManager {
         return currentGameState == JTEGameState.GAME_IN_PROGRESS;
     }
 
-    
-    public void processMove()
+    public void startTurn()
     {
-        
+        ui.clearLines();
+        ui.changeQuadrant(gameInProgress.getCurrentPlayer().getCurrentCity().getQuad());
+        gameInProgress.getCurrentPlayer().roll();
+        ui.updateDie(gameInProgress.getCurrentPlayer().getDicePoints());        
+        ui.setCurrentPlayer(gameInProgress.getCurrentPlayer());
+
+    }        
+    
+    
+    public void changeTurn()
+    {
+        gameInProgress.getPlayers().offer(gameInProgress.getPlayers().remove());
+        gameInProgress.setCurrentPlayer(gameInProgress.getPlayers().peek());
+        ui.clearLines();
     }   
     
     /**
@@ -98,6 +119,9 @@ public class JTEGameStateManager {
         
         //THE GAME HAS OFFICALLY STARTED
         currentGameState = JTEGameState.GAME_IN_PROGRESS;
+        
+        //START WITH PLAYER 1 TURN
+        currentPlayerState = JTETurnState.PLAYER_1;
         
     }   
     

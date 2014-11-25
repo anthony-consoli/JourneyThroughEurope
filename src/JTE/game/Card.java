@@ -6,6 +6,7 @@
 package JTE.game;
 
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 
 /**
  *
@@ -16,8 +17,8 @@ public class Card {
     private City cardCity;
     private String cityName;
     private String cardColor; 
-    private Image frontImage;
-    private Image backImage;
+    private ImageView frontImage;
+    private ImageView backImage;
     private boolean hasInstrutions;
     private String greenImgPath = "file:img/green/";
     private String redImgPath = "file:img/red/";
@@ -29,12 +30,17 @@ public class Card {
         cardCity = city;
         cityName = city.getName();
         
-        if(cardColor.equals("green"))
-            frontImage = new Image(greenImgPath + cityName);
-        else if(cardColor.equals("red"))
-            frontImage = new Image(redImgPath + cityName);
-        else if(cardColor.equals("yellow"))
-            frontImage = new Image(yellowImgPath + cityName);
+        switch (cardColor) {
+            case "green":
+                frontImage = new ImageView(new Image(greenImgPath + cityName + ".jpg"));
+                break;
+            case "red":
+                frontImage = new ImageView(new Image(redImgPath + cityName + ".jpg"));
+                break;
+            case "yellow":
+                frontImage = new ImageView(new Image(yellowImgPath + cityName + ".jpg"));
+                break;
+        }
     }        
     
     public String getColor()
@@ -52,7 +58,7 @@ public class Card {
         return cityName;
     }        
     
-    public Image getFrontImage()
+    public ImageView getFrontImage()
     {
         return frontImage;
     }        

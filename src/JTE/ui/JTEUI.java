@@ -39,6 +39,8 @@ import properties_manager.PropertiesManager;
 import JTE.file.JTEFileLoader;
 import JTE.game.JTEPlayer;
 import java.io.File;
+import java.util.Iterator;
+import javafx.animation.SequentialTransition;
 import javafx.animation.TranslateTransition;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
@@ -96,7 +98,7 @@ public class JTEUI extends Pane {
     private FlowPane gameFlowPane;
     private ToolBar gameToolBar;
     private Label gamePlayerLabel;
-    private AnchorPane gameCardPane;
+    private Pane gameCardPane;
     private Pane rightSidePane;
     Image q1Img = loadImage("gameplay_AC14.jpg");
     Image q2Img = loadImage("gameplay_DF14.jpg");
@@ -105,6 +107,7 @@ public class JTEUI extends Pane {
     private ImageView gameBoardImg;
     private VBox rightSidePanel;
     private Label playerTurnLabel;
+    private Label dieLabel;
     private Image dieImg;
     private ImageView dieImage;
 
@@ -119,7 +122,7 @@ public class JTEUI extends Pane {
     private JTEEventHandler eventHandler;
     private JTEErrorHandler errorHandler;
     private JTEDocumentManager docManager;
-    
+
     //CURRENT QUADRANT
     private JTEQuadState currentQuadrant;
 
@@ -140,21 +143,18 @@ public class JTEUI extends Pane {
     final double offsetX = 25;
     final double offsetY = 40;
 
-    Image firstCard = loadImage("red/ABERDEEN.jpg");
-    Image secondCard = loadImage("green/BASEL.jpg");
-    Image thirdCard = loadImage("yellow/ANCONA.jpg");
+    Image die1 = loadImage("die_1.jpg");
+    Image die2 = loadImage("die_2.jpg");
+    Image die3 = loadImage("die_3.jpg");
+    Image die4 = loadImage("die_4.jpg");
+    Image die5 = loadImage("die_5.jpg");
+    Image die6 = loadImage("die_6.jpg");
     double yOff = 60;
     double xOff = 8;
 
-    ImageView p2 = new ImageView(firstCard);
-    ImageView p3 = new ImageView(secondCard);
-    ImageView p4 = new ImageView(thirdCard);
-
-    Thread one;
+    JTEPlayer currentPlayer;
 
     private City[] cities;
-
-    JTEPlayer player1;
 
     public JTEUI() {
         gsm = new JTEGameStateManager(this);
@@ -349,7 +349,7 @@ public class JTEUI extends Pane {
         gameFlowPane = new FlowPane();
         gameToolBar = new ToolBar();
         gamePlayerLabel = new Label("Player 1                 ");
-        gameCardPane = new AnchorPane();
+        gameCardPane = new Pane();
         rightSidePane = new Pane();
         gameBoardPane = new AnchorPane();
         gameBoardImg = new ImageView();
@@ -357,9 +357,7 @@ public class JTEUI extends Pane {
         gameBoardImg.setSmooth(true);
         rightSidePanel = new VBox();
         playerTurnLabel = new Label("Player 1 Turn");
-        dieImg = loadImage("die_5.jpg");
         dieImage = new ImageView();
-        dieImage.setImage(dieImg);
 
         //SET UP QUADRANT SELECTION BUTTONS
         GridPane quadControl = new GridPane();
@@ -444,9 +442,10 @@ public class JTEUI extends Pane {
 
         //TESTING LABEL TO DISPLAY CITY CLICKED
         cityLabel = new Label("City");
+        dieLabel = new Label("Dice Points: ");
 
         //ADD COMPONENTS TO RIGHT SIDE PANEL
-        rightSidePanel.getChildren().addAll(playerTurnLabel, dieImage, quadControl, buttonBox, cityLabel);
+        rightSidePanel.getChildren().addAll(playerTurnLabel, dieImage, dieLabel, quadControl, buttonBox, cityLabel);
 
         //THIS CODE WILL HAVE TO CHANGE TODO.....
         gameBoardPane.getChildren().add(gameBoardImg);
@@ -463,14 +462,13 @@ public class JTEUI extends Pane {
             String tmpStr = gameBoardPane.getChildren().get(i).toString();
             City tmp = (City) gameBoardPane.getChildren().get(i);
             tmp.setOnMouseClicked(mouseEvent -> {
-                eventHandler.respondToCityRequest(tmp, player1, tmpStr, tmp.getX(), tmp.getY());
+                eventHandler.respondToCityRequest(tmp, currentPlayer, tmpStr, tmp.getX(), tmp.getY());
 
             });
         }
 
         //TESTING
         initPlayerSprites();
-        changeQuadrant(player1.getCurrentCity().getQuad());
 
         rightSidePane.getChildren().addAll(gameBoardPane);
 
@@ -490,20 +488,24 @@ public class JTEUI extends Pane {
 
     public void initPlayerSprites() {
 
-        player1 = new JTEPlayer(1, false);
-        p1.setImage(player1.getSprite());
-        p2.setImage(player1.getFlag());
-        gameBoardPane.getChildren().add(p2);
-        player1.setCurrentCity(cities[17]);
-        gameBoardPane.getChildren().add(p1);
-        p1.setX(player1.getCurrentX() - offsetX);
-        p1.setY(player1.getCurrentY() - offsetY);
-        p2.setX(player1.getCurrentX() - offsetX - 10);
-        p2.setY(player1.getCurrentY() - offsetY - 10);
-        xPos = p1.getX();
-        yPos = p1.getY();
-        drawLines();
-
+        Iterator<JTEPlayer> it = gsm.getGameInProgress().getPlayers().iterator();
+        while (it.hasNext()) {
+            JTEPlayer playerTmp = it.next();
+            ImageView tmpSpr = playerTmp.getSpritePiece();
+            ImageView tmpFlg = playerTmp.getFlagPiece();
+            AnchorPane cardPane = playerTmp.getCardPane();
+            playerTmp.setCurrentCity(playerTmp.getHomeCity());
+            updatePlayerPosition(playerTmp.getHomeCity(), playerTmp, playerTmp.getHomeCity().getName(),playerTmp.getHomeCity().getX(), playerTmp.getHomeCity().getY());
+            tmpFlg.setX(playerTmp.getCurrentX() - offsetX + 10);
+            tmpFlg.setY(playerTmp.getCurrentY() - offsetY + 10);
+            gameCardPane.getChildren().add(cardPane);
+            cardPane.setVisible(false);
+            gameBoardPane.getChildren().add(tmpSpr);
+            gameBoardPane.getChildren().add(tmpFlg);
+        }
+        clearLines();
+        gsm.startTurn();
+        drawLines(gsm.getGameInProgress().getCurrentPlayer());
     }
 
     private void initHistoryScreen() {
@@ -613,10 +615,28 @@ public class JTEUI extends Pane {
     }
 
     public void changeQuadrant(int quadNum) {
+        clearLines();
+        Iterator<JTEPlayer> it = gsm.getGameInProgress().getPlayers().iterator();
+        while (it.hasNext()) {
+            JTEPlayer tmpPlayer = it.next();
+            if (tmpPlayer.getCurrentCity().getQuad() != quadNum) {
+                clearLines();
+                tmpPlayer.getSpritePiece().setVisible(false);
+            } else {
+                drawLines(tmpPlayer);
+                tmpPlayer.getSpritePiece().setVisible(true);
+            }
+            if (tmpPlayer.getHomeCity().getQuad() != quadNum) {
+                tmpPlayer.getFlagPiece().setVisible(false);
+            } else {
+                tmpPlayer.getFlagPiece().setVisible(true);
+            }
+        }
 
         if (quadNum == 1) {
             currentQuadrant = JTEQuadState.QUAD_1;
             gameBoardImg.setImage(q1Img);
+
             for (int i = 0; i < cities.length; i++) {
                 switch (cities[i].getQuad()) {
                     case 1:
@@ -699,36 +719,105 @@ public class JTEUI extends Pane {
     }
 
     public void updatePlayerPosition(City c, JTEPlayer player, String tempStr, double x, double y) {
+        player.getSpritePiece().setVisible(true);
         clearLines();
         cityLabel.setText(tempStr);
+
         double xDest = x - offsetX;
         double yDest = y - offsetY;
-        TranslateTransition translateTransition1 = new TranslateTransition(Duration.millis(1000), p1);
-        translateTransition1.setFromX(player.getCurrentX() - offsetX - 40);
-        translateTransition1.setFromY(player.getCurrentY() - offsetY - 190);
-        translateTransition1.setToX(x - offsetX - 45);
-        translateTransition1.setToY(y - offsetY - 195);
+        TranslateTransition translateTransition1 = new TranslateTransition(Duration.millis(1000), player.getSpritePiece());
+        translateTransition1.setFromX(player.getCurrentX() - offsetX);
+        translateTransition1.setFromY(player.getCurrentY() - offsetY);
+        translateTransition1.setToX(x - offsetX);
+        translateTransition1.setToY(y - offsetY);
         clearLines();
         translateTransition1.play();
         player.setCurrentCity(c);
         clearLines();
-        drawLines();
-        updatePos(xDest, yDest);
+        drawLines(player);
+        player.makeMove();
+        for(int i=0;i<player.getCards().size();i++)
+        {
+            if(c.equals(player.getCards().get(i).getCity()) && c != player.getHomeCity())
+            {
+                player.getCardPane().getChildren().remove(i);
+                player.removeCard(player.getCards().get(i));
+                player.setDicePoints(0);
+            }    
+        }    
+        if(player.getCards().size() == 1 && c == player.getHomeCity())
+        {
+            player.getCardPane().getChildren().remove(0);
+            player.removeCard(player.getCards().get(0));
+            player.setDicePoints(0);
+        }    
+        translateTransition1.setOnFinished(new EventHandler<ActionEvent>() {
+            
+            @Override
+            public void handle(ActionEvent event) {
+                if (player.getDicePoints() == 0) {
+                    gsm.changeTurn();
+                    gsm.startTurn();
+                    drawLines(gsm.getGameInProgress().getCurrentPlayer());
+                }
+            }
+        });
 
     }
 
-    public void updatePos(double x, double y) {
-        xPos = x;
-        yPos = y;
+    public void setCurrentPlayer(JTEPlayer player) {
+        currentPlayer = player;
+        Iterator<JTEPlayer> it = gsm.getGameInProgress().getPlayers().iterator();
+        while(it.hasNext())
+        {
+            JTEPlayer tmp = it.next();
+            if(tmp == currentPlayer)
+            {
+                tmp.getCardPane().setVisible(true);
+            }    
+            else
+                tmp.getCardPane().setVisible(false);
+        }    
+        
+        switch (player.getPlayNum()) {
+            case 1:
+                playerTurnLabel.setText("Player 1 Turn");
+                gamePlayerLabel.setText("Player 1                 ");
+                break;
+            case 2:
+                playerTurnLabel.setText("Player 2 Turn");
+                gamePlayerLabel.setText("Player 2                 ");
+                break;
+            case 3:
+                playerTurnLabel.setText("Player 3 Turn");
+                gamePlayerLabel.setText("Player 3                 ");
+                break;
+            case 4:
+                playerTurnLabel.setText("Player 4 Turn");
+                gamePlayerLabel.setText("Player 4                 ");
+                break;
+            case 5:
+                playerTurnLabel.setText("Player 5 Turn");
+                gamePlayerLabel.setText("Player 5                 ");
+                break;
+            case 6:
+                playerTurnLabel.setText("Player 6 Turn");
+                gamePlayerLabel.setText("Player 6                 ");
+                break;
+        }
+
     }
 
-    public void drawLines() {
-        double x1 = player1.getCurrentCity().getX();
-        double y1 = player1.getCurrentCity().getY();
-        for (int i = 0; i < player1.getCurrentCity().getLandNeighbors().size(); i++) {
-            if (player1.getCurrentCity().getLandNeighbors().get(i).getQuad() == player1.getCurrentCity().getQuad()) {
-                double x2 = player1.getCurrentCity().getLandNeighbors().get(i).getX();
-                double y2 = player1.getCurrentCity().getLandNeighbors().get(i).getY();
+    /**
+     * THIS METHOD DRAWS RED LINES BETWEEN NEIGHBORING CITIES IN EACH QUADRANT
+     */
+    public void drawLines(JTEPlayer p) {
+        double x1 = p.getCurrentCity().getX();
+        double y1 = p.getCurrentCity().getY();
+        for (int i = 0; i < p.getCurrentCity().getLandNeighbors().size(); i++) {
+            if (p.getCurrentCity().getLandNeighbors().get(i).getQuad() == p.getCurrentCity().getQuad()) {
+                double x2 = p.getCurrentCity().getLandNeighbors().get(i).getX();
+                double y2 = p.getCurrentCity().getLandNeighbors().get(i).getY();
 
                 Line line1 = new Line(x1, y1, x2, y2);
                 line1.setStrokeWidth(5);
@@ -737,10 +826,10 @@ public class JTEUI extends Pane {
                 gameBoardPane.getChildren().add(line1);
             }
         }
-        for (int i = 0; i < player1.getCurrentCity().getSeaNeighbors().size(); i++) {
-            if (player1.getCurrentCity().getSeaNeighbors().get(i).getQuad() == player1.getCurrentCity().getQuad()) {
-                double x2 = player1.getCurrentCity().getSeaNeighbors().get(i).getX();
-                double y2 = player1.getCurrentCity().getSeaNeighbors().get(i).getY();
+        for (int i = 0; i < p.getCurrentCity().getSeaNeighbors().size(); i++) {
+            if (p.getCurrentCity().getSeaNeighbors().get(i).getQuad() == p.getCurrentCity().getQuad()) {
+                double x2 = p.getCurrentCity().getSeaNeighbors().get(i).getX();
+                double y2 = p.getCurrentCity().getSeaNeighbors().get(i).getY();
 
                 Line line2 = new Line(x1, y1, x2, y2);
                 line2.setStrokeWidth(5);
@@ -752,6 +841,10 @@ public class JTEUI extends Pane {
 
     }
 
+    /**
+     * THIS METHOD REMOVES RED LINES DRAWN AS PATHS FROM PREVIOUSLY VISITED
+     * CITIES
+     */
     public void clearLines() {
         for (int i = 0; i < gameBoardPane.getChildren().size(); i++) {
             if (gameBoardPane.getChildren().get(i).getClass() == Line.class) {
@@ -760,4 +853,53 @@ public class JTEUI extends Pane {
         }
 
     }
-}
+    
+        public void dealCard(ImageView img) 
+    {
+        
+        mainPane.getChildren().add(img);
+        TranslateTransition translateTransition1 = new TranslateTransition(Duration.millis(1000), img);
+        translateTransition1.setFromX(330);
+        translateTransition1.setFromY(420);
+        translateTransition1.setToX(xOff);
+        translateTransition1.setToY(yOff);
+        translateTransition1.play();
+
+
+        yOff += 60;
+        
+        }
+        
+        public void updateDie(int i)
+        {
+            switch(i)
+            {
+                case 1:
+                    dieImage.setImage(die1);
+                    dieLabel.setText("Dice Points: 1");
+                    break;
+                case 2:
+                    dieImage.setImage(die2);
+                    dieLabel.setText("Dice Points: 2");
+                    break;
+                case 3:
+                    dieImage.setImage(die3);
+                    dieLabel.setText("Dice Points: 3");
+                    break;
+                case 4:
+                    dieImage.setImage(die4);
+                    dieLabel.setText("Dice Points: 4");
+                    break;
+                case 5:
+                    dieImage.setImage(die5);
+                    dieLabel.setText("Dice Points: 5");
+                    break;
+                case 6:
+                    dieImage.setImage(die6);
+                    dieLabel.setText("Dice Points: 6");
+                    break;
+            } 
+        }
+}    
+
+
