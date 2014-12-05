@@ -14,6 +14,13 @@ import JTE.game.City;
 import JTE.game.JTEGameStateManager;
 import JTE.game.JTEPlayer;
 import JTE.ui.JTEUI.JTEUIState;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
 public class JTEEventHandler {
     
@@ -38,14 +45,12 @@ public class JTEEventHandler {
         ui.changeWorkspace(uiState);
     }   
     
-    public void respondToNewGameRequest(int p)
+    public void respondToNewGameRequest(int p, boolean[] cpu)
     {
-        //ALOT OF DIFFERENT THINGS TO DO TO ACTUALLY SET UP NEW GAME
-        //FOR HW5 I WILL JUST BE CHANGING THE WORKSPACE TO THE GAMEPLAY
-        //SCREEN
+
         JTEGameStateManager gsm = ui.getGSM();
-        gsm.makeNewGame(p);
-        ui.changeWorkspace(JTEUIState.PLAY_GAME_STATE);
+        gsm.makeNewGame(p, cpu);
+        ui.initGameScreen();
     } 
     
     public void respondToCityRequest(City c, JTEPlayer player, String str, double x, double y)
@@ -54,6 +59,7 @@ public class JTEEventHandler {
         {
             ui.updatePlayerPosition(c, player,str, x, y);
         }    
+        
     }        
     
     public void respondToLoadGameRequest()
@@ -71,17 +77,41 @@ public class JTEEventHandler {
         System.exit(0);
     }   
     
-    public void respondToGameOver()
+    public void respondToFlightRequest()
     {
-        
-    }   
+        ui.changeQuadrant(5);
+    }        
+    
+    public void respondToGameOver(JTEPlayer p)
+    {
+        ui.getGSM().setGameState(JTEGameStateManager.JTEGameState.GAME_OVER);
+        Stage newStage = new Stage();
+        VBox comp = new VBox();
+        Label nameField = new Label("Player " + p.getPlayNum() + " wins!");
+        Button rtnBtn = new Button("Return To Splash Screen");
+        rtnBtn.setOnAction(new EventHandler<ActionEvent>(){
+            @Override
+            public void handle(ActionEvent e)
+            {
+                ui.initSplashScreen();
+                ui.getGSM().setGameState(JTEGameStateManager.JTEGameState.GAME_NOT_STARTED);
+                newStage.close();
+            }        
+        });
+        comp.getChildren().add(nameField);
+        comp.getChildren().add(rtnBtn);
+        Scene stageScene = new Scene(comp, 200, 200);
+        newStage.setScene(stageScene);
+        newStage.show();
+    }
+    
     
     public void respondToBackRequest()
     {
         if(!ui.getGSM().isGameInProgess())
-            ui.initSplashScreen();
+            ui.changeWorkspace(JTEUIState.SPLASH_SCREEN_STATE);
         else
-            ui.initGameScreen();
+            ui.changeWorkspace(JTEUIState.PLAY_GAME_STATE);
     }
     
     public void respondToHistoryRequest()

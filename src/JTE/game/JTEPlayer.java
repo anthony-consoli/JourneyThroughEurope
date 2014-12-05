@@ -6,6 +6,7 @@
 package JTE.game;
 
 import java.util.ArrayList;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
@@ -21,25 +22,26 @@ public class JTEPlayer {
     
     
     //HAND OF CARDS DEALT TO PLAYER
-    ArrayList<Card> handOfCards = new ArrayList<Card>();
-    int dicePoints;
-    Image sprite;
-    Image flag;
-    ImageView playerPiece;
-    ImageView flagPiece;
-    boolean cpu;
-    City currentCity;
-    City homeCity;
-    double currentX;
-    double currentY;
-    int playerNumber;
-    boolean rollAgain;
-    AnchorPane cardPane;
-    int yOff = 0;
-    int xOff = 0;
-    double transX;
-    double transY;
-    boolean firstTurn;
+    private ArrayList<Card> handOfCards = new ArrayList<Card>();
+    private ConcurrentLinkedQueue<City> cpuTrip;
+    private int dicePoints;
+    private Image sprite;
+    private Image flag;
+    private ImageView playerPiece;
+    private ImageView flagPiece;
+    private boolean cpu;
+    private City currentCity;
+    private City homeCity;
+    private double currentX;
+    private double currentY;
+    private int playerNumber;
+    private boolean rollAgain;
+    private AnchorPane cardPane;
+    private int yOff = 0;
+    private int xOff = 0;
+    private double transX;
+    private double transY;
+    private boolean firstTurn;
     
     public JTEPlayer(int playNum, ArrayList<Card>hand, boolean cmp)
     {
@@ -82,7 +84,7 @@ public class JTEPlayer {
         rollAgain = false;
         handOfCards = hand;
         homeCity = hand.get(0).getCity();
-        currentCity = null;
+        currentCity = hand.get(0).getCity();
         currentX=0;
         currentY=0;
         playerPiece = new ImageView(sprite);
@@ -90,6 +92,7 @@ public class JTEPlayer {
         cardPane = new AnchorPane();
         double transX = 25;
         double transY = 25;
+        cpu = cmp;
         
         for(int i=0;i<handOfCards.size();i++)
         {
@@ -206,9 +209,26 @@ public class JTEPlayer {
     public double getTransY()
     {
         return transY;
+    } 
+    
+    public boolean isCpu()
+    {
+        return cpu;
     }        
+    
+    public void setTrip(ConcurrentLinkedQueue<City> trip)
+    {
+        cpuTrip = trip;
+    }        
+    
     public void removeCard(Card c)
     {
         handOfCards.remove(c);
     }        
+    
+    public  ConcurrentLinkedQueue<City> getCpuTrip()
+    {
+        return cpuTrip;
+    }        
 }
+

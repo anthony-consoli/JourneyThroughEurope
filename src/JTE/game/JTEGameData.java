@@ -14,6 +14,11 @@ import JTE.file.JTEFileLoader;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.PriorityQueue;
 import java.util.Random;
 import java.util.Stack;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -40,9 +45,11 @@ public class JTEGameData {
 
     //HASHMAP OF CITIES FOR ADDING NEIGHBORS
     private HashMap<String, City> cityHash;
+    private HashMap<String, Vertex> verticies;
 
     //NUMBER OF PLAYERS
     private int numPlayers;
+    private boolean[] cpuOrPlayer;
 
     //Players 
     ConcurrentLinkedQueue<JTEPlayer> players = new ConcurrentLinkedQueue<JTEPlayer>();
@@ -56,13 +63,15 @@ public class JTEGameData {
     Stack<Card> redDeck = new Stack<Card>();
     Stack<Card> yellowDeck = new Stack<Card>();
 
-    public JTEGameData(int num) {
+    public JTEGameData(int num, boolean[] cpu) {
         
         numPlayers = num;
+        cpuOrPlayer = cpu;
         //cities in the game
         fileLoader = new JTEFileLoader(schemaFile);
         cities = fileLoader.loadCities(citiesFile);
         cityHash = new HashMap<String, City>();
+        verticies = new HashMap<String, Vertex>();
 
         //CREATE THREE DECKS OF CARDS
         for (int i = 0; i < cities.length; i++) {
@@ -76,6 +85,7 @@ public class JTEGameData {
             }
             //CREATE A HASH MAP OF CITIES USED TO EASILY SET UP NEIGHBORS
             cityHash.put(cities[i].getName(), cities[i]);
+            verticies.put(cities[i].getName(), new Vertex(cities[i].getName()));
         }
         
         //SHUFFLE THE DECKS
@@ -94,6 +104,8 @@ public class JTEGameData {
                 ArrayList<City> landNeighbors = new ArrayList<City>();
                 ArrayList<City> seaNeighbors = new ArrayList<City>();
                 City tmpCity = new City();
+                Vertex vertCity = new Vertex("");
+                ArrayList<Edge> tmpEdge = new ArrayList<Edge>();
                 Node cardNode = cardlist.item(i);
                 if (cardNode.getNodeType() == Node.ELEMENT_NODE) {
                     NodeList cardAttrs = cardNode.getChildNodes();
@@ -104,12 +116,14 @@ public class JTEGameData {
                             switch (theNode.getNodeName()) {
                                 case "name":
                                     tmpCity = cityHash.get(theNode.getTextContent());
+                                    vertCity = verticies.get(theNode.getTextContent());
                                     break;
                                 case "land":
                                     NodeList landList = theNode.getChildNodes();
                                     for (int k = 0; k < landList.getLength(); k++) {
                                         if (landList.item(k).getNodeType() == Node.ELEMENT_NODE) {
                                             landNeighbors.add(cityHash.get(landList.item(k).getTextContent()));
+                                            tmpEdge.add(new Edge(verticies.get(landList.item(k).getTextContent()), 1));
                                         }
                                     }
                                     break;
@@ -118,6 +132,7 @@ public class JTEGameData {
                                     for (int k = 0; k < seaList.getLength(); k++) {
                                         if (seaList.item(k).getNodeType() == Node.ELEMENT_NODE) {
                                             seaNeighbors.add(cityHash.get(seaList.item(k).getTextContent()));
+                                            tmpEdge.add(new Edge(verticies.get(seaList.item(k).getTextContent()), 6));
                                         }
                                     }
                                     break;
@@ -127,6 +142,16 @@ public class JTEGameData {
                     }
                     tmpCity.addLandNeighbors(landNeighbors);
                     tmpCity.addSeaNeighbors(seaNeighbors);
+                    Iterator<Edge> edgeIT = tmpEdge.iterator();
+                    Edge[] edges = new Edge[tmpEdge.size()];
+                    int pos = 0;
+                    while(edgeIT.hasNext())
+                    {
+                        edges[pos] = edgeIT.next();
+                        pos++;
+                    }    
+                        
+                    vertCity.adjacencies = edges;
                 }
                                     
             }
@@ -170,8 +195,53 @@ public class JTEGameData {
                     playerHand.add(greenDeck.pop());
                     break;                     
             }
-            players.add(new JTEPlayer((i + 1), playerHand, false));
+            players.add(new JTEPlayer((i + 1), playerHand, cpuOrPlayer[i]));
         }
+        
+        Iterator<JTEPlayer> it = players.iterator();
+        while(it.hasNext())
+        {
+
+            JTEPlayer tmpPlayer = it.next();
+            //for(int i=0;i<3;i++)
+              //  System.out.print(tmpPlayer.getCards().get(i).getCityName() + "   ");
+            ConcurrentLinkedQueue<City> playerPath = new ConcurrentLinkedQueue<City>();
+            if(tmpPlayer.isCpu())
+            {
+                
+                resetVerticies();
+                
+                computePaths(verticies.get(tmpPlayer.getCards().get(0).getCityName()));
+                List<Vertex> path1 = getShortestPathTo(verticies.get(tmpPlayer.getCards().get(1).getCityName()));
+                for(int i=1;i< path1.size();i++)
+                {
+                    playerPath.add(cityHash.get(path1.get(i).toString()));
+                }
+                
+                resetVerticies();
+                
+                computePaths(verticies.get(tmpPlayer.getCards().get(1).getCityName()));
+                List<Vertex> path2 = getShortestPathTo(verticies.get(tmpPlayer.getCards().get(2).getCityName()));
+                for(int i=1;i< path2.size();i++)
+                {
+                    playerPath.add(cityHash.get(path2.get(i).toString()));
+                }                 
+                
+                resetVerticies();
+                
+                computePaths(verticies.get(tmpPlayer.getCards().get(2).getCityName()));
+                List<Vertex> path3 = getShortestPathTo(verticies.get(tmpPlayer.getCards().get(0).getCityName()));
+                for(int i=1;i< path3.size();i++)
+                {
+                    playerPath.add(cityHash.get(path3.get(i).toString()));
+                }         
+                
+                
+                
+                tmpPlayer.setTrip(playerPath);
+            }    
+        }    
+        
         currentPlayer = players.peek();
 
     }
@@ -221,6 +291,11 @@ public class JTEGameData {
         return cities;
     }
 
+    public HashMap<String,City> getCityHash()
+    {
+        return cityHash;
+    }        
+    
     public ConcurrentLinkedQueue<JTEPlayer> getPlayers()
     {
         return players;
@@ -249,5 +324,84 @@ public class JTEGameData {
     {
         return yellowDeck;
     }        
-        
+   
+
+
+    public static void computePaths(Vertex source) {
+        source.minDistance = 0.;
+        PriorityQueue<Vertex> vertexQueue = new PriorityQueue<Vertex>();
+        vertexQueue.add(source);
+        while (!vertexQueue.isEmpty()) {
+            Vertex u = vertexQueue.poll();
+            // Visit each edge exiting u
+            for (Edge e : u.adjacencies) {
+                Vertex v = e.target;
+                double weight = e.weight;
+                double distanceThroughU = u.minDistance + weight;
+                if (distanceThroughU < v.minDistance) {
+                    vertexQueue.remove(v);
+                    v.minDistance = distanceThroughU;
+                    v.previous = u;
+                    vertexQueue.add(v);
+                }
+            }
+        }
+    }
+
+    public static List<Vertex> getShortestPathTo(Vertex target) {
+        List<Vertex> path = new ArrayList<Vertex>();
+        for (Vertex vertex = target; vertex != null; vertex = vertex.previous) {
+            path.add(vertex);
+        }
+        Collections.reverse(path);
+        return path;
+
+
+    }
+    
+    public void resetVerticies()
+    {
+        Iterator itV = verticies.entrySet().iterator();
+        while(itV.hasNext())
+        {
+            Map.Entry pairs = (Map.Entry)itV.next(); 
+            Vertex tmp = (Vertex) pairs.getValue();
+            tmp.minDistance = Double.POSITIVE_INFINITY;
+            tmp.previous = null;
+        }    
+    }        
+            
+}
+
+
+
+    class Vertex implements Comparable<Vertex> {
+
+    public final String name;
+    public Edge[] adjacencies;
+    public double minDistance = Double.POSITIVE_INFINITY;
+    public Vertex previous;
+
+    public Vertex(String argName) {
+        name = argName;
+    }
+
+    public String toString() {
+        return name;
+    }
+
+    public int compareTo(Vertex other) {
+        return Double.compare(minDistance, other.minDistance);
+    }
+}
+
+class Edge {
+
+    public final Vertex target;
+    public final double weight;
+
+    public Edge(Vertex argTarget, double argWeight) {
+        target = argTarget;
+        weight = argWeight;
+    }
 }
