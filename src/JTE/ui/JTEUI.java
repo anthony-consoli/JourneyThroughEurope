@@ -40,11 +40,10 @@ import JTE.file.JTEFileLoader;
 import JTE.game.FlightCity;
 import JTE.game.JTEPlayer;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Scanner;
+import java.util.Map;
 import javafx.animation.TranslateTransition;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
@@ -106,6 +105,7 @@ public class JTEUI extends Pane {
     private Pane gameCardPane;
     private Pane rightSidePane;
     private BorderPane setupPane;
+    Button flightButton;
     Image q1Img = loadImage("gameplay_AC14.jpg");
     Image q2Img = loadImage("gameplay_DF14.jpg");
     Image q3Img = loadImage("gameplay_AC58.jpg");
@@ -165,7 +165,7 @@ public class JTEUI extends Pane {
 
     private City[] cities;
     private FlightCity[] flightCities;
-    private HashMap<String, FlightCity> flightHash; 
+    private HashMap<String, FlightCity> flightHash;
 
     public JTEUI() {
         gsm = new JTEGameStateManager(this);
@@ -313,6 +313,7 @@ public class JTEUI extends Pane {
         //NUMBER OF PLAYERS TO BE SELECTED
         ChoiceBox cb = new ChoiceBox(FXCollections.observableArrayList(
                 "1", "2", "3", "4", "5", "6"));
+        cb.getSelectionModel().selectLast();
         cb.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
             public void changed(ObservableValue ov,
                     Number value, Number new_value) {
@@ -361,15 +362,19 @@ public class JTEUI extends Pane {
         gamePlayPane = new StackPane();
         gameSplitPane = new SplitPane();
         gameFlowPane = new FlowPane();
+        gameFlowPane.setStyle("-fx-background-color: linear-gradient(#61a2b1, #2A5058 );");
         gameToolBar = new ToolBar();
+        //gameToolBar.setStyle("-fx-background-color: linear-gradient(#61a2b1, #2A5058 );");
         gamePlayerLabel = new Label("Player 1                 ");
         gameCardPane = new Pane();
         rightSidePane = new Pane();
         gameBoardPane = new AnchorPane();
+        gameBoardPane.setStyle("-fx-background-color: linear-gradient(#61a2b1, #2A5058);");
         gameBoardImg = new ImageView();
         gameBoardImg.setImage(q1Img);
         gameBoardImg.setSmooth(true);
         rightSidePanel = new VBox();
+        rightSidePanel.setStyle("-fx-background-color: linear-gradient(#61a2b1, #2A5058 );");
         playerTurnLabel = new Label("Player 1 Turn");
         dieImage = new ImageView();
 
@@ -429,11 +434,12 @@ public class JTEUI extends Pane {
         });
 
         //CREATE ABOUT BUTTON AND HANDLER
-        Button flightButton = new Button("Flight Plan");
+        flightButton = new Button("Flight Plan");
+        
         flightButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent e) {
-                eventHandler.respondToFlightRequest();
+                eventHandler.respondToFlightScreenRequest();
             }
         });
 
@@ -448,7 +454,10 @@ public class JTEUI extends Pane {
 
         //CREATE VBOX FOR BUTTONS
         VBox buttonBox = new VBox();
+        buttonBox.setSpacing(10);
+
         //ADD BUTTONS TO VBOX
+        buttonBox.getChildren().add(quadControl);
         buttonBox.getChildren().add(flightButton);
         buttonBox.getChildren().add(historyButton);
         buttonBox.getChildren().add(aboutButton);
@@ -459,7 +468,7 @@ public class JTEUI extends Pane {
         dieLabel = new Label("Dice Points: ");
 
         //ADD COMPONENTS TO RIGHT SIDE PANEL
-        rightSidePanel.getChildren().addAll(playerTurnLabel, dieImage, dieLabel, quadControl, buttonBox, cityLabel);
+        rightSidePanel.getChildren().addAll(playerTurnLabel, dieImage, dieLabel, buttonBox, cityLabel);
 
         //THIS CODE WILL HAVE TO CHANGE TODO.....
         gameBoardPane.getChildren().add(gameBoardImg);
@@ -473,7 +482,7 @@ public class JTEUI extends Pane {
         }
 
         //LOAD FLIGHT CITIES
-        
+        initFlightPlan();
         
         for (int i = 1; i < cities.length + 1; i++) {
             String tmpStr = gameBoardPane.getChildren().get(i).toString();
@@ -501,7 +510,7 @@ public class JTEUI extends Pane {
         gsm.setGameOn();
         changeWorkspace(JTEUIState.PLAY_GAME_STATE);
 
-       //dealCards();
+        //dealCards();
     }
 
     public void initPlayerSprites() {
@@ -520,32 +529,7 @@ public class JTEUI extends Pane {
             cardPane.setVisible(false);
             gameBoardPane.getChildren().add(tmpSpr);
             gameBoardPane.getChildren().add(tmpFlg);
-            tmpSpr.setOnMouseDragged(new EventHandler<MouseEvent>() {
-                @Override
-                public void handle(MouseEvent mouseEvent) {
-                    tmpSpr.setX(mouseEvent.getX());
-                    tmpSpr.setY(mouseEvent.getY());
-                }
-            });
-            tmpSpr.setOnMouseReleased(new EventHandler<MouseEvent>() {
-                @Override
-                public void handle(MouseEvent mouseEvent) {
-                    for (int i = 0; i < playerTmp.getCurrentCity().getLandNeighbors().size(); i++) {
-                        if (mouseEvent.getX() == playerTmp.getCurrentCity().getLandNeighbors().get(i).getX() && mouseEvent.getY() == playerTmp.getCurrentCity().getLandNeighbors().get(i).getY()) {
-                            updatePlayerPosition(playerTmp.getCurrentCity().getLandNeighbors().get(i), playerTmp, playerTmp.getCurrentCity().getLandNeighbors().get(i).getName(), playerTmp.getCurrentCity().getLandNeighbors().get(i).getX(), playerTmp.getCurrentCity().getLandNeighbors().get(i).getY());
-                        } else {
-                            goBackToCity(playerTmp.getCurrentCity(), playerTmp, playerTmp.getCurrentCity().getName(), playerTmp.getCurrentCity().getX(), playerTmp.getCurrentCity().getY());
-                        }
-                    }
-                    for (int i = 0; i < playerTmp.getCurrentCity().getSeaNeighbors().size(); i++) {
-                        if (mouseEvent.getX() == playerTmp.getCurrentCity().getSeaNeighbors().get(i).getX() && mouseEvent.getY() == playerTmp.getCurrentCity().getSeaNeighbors().get(i).getY()) {
-                            updatePlayerPosition(playerTmp.getCurrentCity().getSeaNeighbors().get(i), playerTmp, playerTmp.getCurrentCity().getSeaNeighbors().get(i).getName(), playerTmp.getCurrentCity().getSeaNeighbors().get(i).getX(), playerTmp.getCurrentCity().getSeaNeighbors().get(i).getY());
-                        } else {
-                            goBackToCity(playerTmp.getCurrentCity(), playerTmp, playerTmp.getCurrentCity().getName(), playerTmp.getCurrentCity().getX(), playerTmp.getCurrentCity().getY());
-                        }
-                    }
-                }
-            });
+
         }
         clearLines();
         gsm.startTurn();
@@ -588,33 +572,26 @@ public class JTEUI extends Pane {
     }
 
     public void initFlightPlan() {
-        
-            File file = new File("file:data/flightPlan.txt");
 
-    try {
+        flightHash = gsm.getGameInProgress().getFlightCities();
+        Iterator it = flightHash.entrySet().iterator();
 
-        Scanner sc = new Scanner(file);
+        while (it.hasNext()) {
+            Map.Entry pairs = (Map.Entry) it.next();
+            FlightCity tmpCity = (FlightCity) pairs.getValue();
+            String tmpStr = (String) pairs.getKey();
+            int destSector = tmpCity.getSector();
+            City destCity = gsm.getGameInProgress().getCityHash().get(tmpStr);
+            gameBoardPane.getChildren().add(tmpCity);
+            double tmpX = gsm.getGameInProgress().getCityHash().get(tmpStr).getX();
+            double tmpY = gsm.getGameInProgress().getCityHash().get(tmpStr).getY();
+            tmpCity.setOnMouseClicked(mouseEvent -> {
+                int currentSector = flightHash.get(gsm.getGameInProgress().getCurrentPlayer().getCurrentCity().getName()).getSector();
+                eventHandler.respondToFlightRequest(destCity, currentPlayer, currentSector, destSector, tmpStr, tmpX, tmpY);
 
-        
-        while (sc.hasNextLine()) {
-            FlightCity tmpCity;
-            String str = sc.next();
-            double x = .6 * sc.nextInt();
-            double y = .7 * sc.nextInt();            
-            int sector = sc.nextInt();
-
-          
-            tmpCity = new FlightCity(str, x, y, sector);
-            flightHash.put(str,tmpCity);
-
+            });
+            
         }
-        sc.close();
-    } 
-    catch (FileNotFoundException e) {
-        e.printStackTrace();
-    }
-        
-        
 
     }
 
@@ -701,14 +678,17 @@ public class JTEUI extends Pane {
 
     public void changeQuadrant(int quadNum) {
         clearLines();
+        if(quadNum == gsm.getGameInProgress().getCurrentPlayer().getCurrentCity().getQuad())
+            drawLines(gsm.getGameInProgress().getCurrentPlayer());
+        else
+            clearLines();
         Iterator<JTEPlayer> it = gsm.getGameInProgress().getPlayers().iterator();
         while (it.hasNext()) {
             JTEPlayer tmpPlayer = it.next();
             if (tmpPlayer.getCurrentCity().getQuad() != quadNum) {
-                clearLines();
                 tmpPlayer.getSpritePiece().setVisible(false);
             } else {
-                drawLines(tmpPlayer);
+                //drawLines(tmpPlayer);
                 tmpPlayer.getSpritePiece().setVisible(true);
             }
             if (tmpPlayer.getHomeCity().getQuad() != quadNum) {
@@ -738,6 +718,11 @@ public class JTEUI extends Pane {
                         break;
                 }
             }
+            for (int i = 0; i < gameBoardPane.getChildren().size(); i++) {
+                if (gameBoardPane.getChildren().get(i).getClass() == FlightCity.class) {
+                    gameBoardPane.getChildren().get(i).setVisible(false);
+                }
+            }
 
         } else if (quadNum == 2) {
             currentQuadrant = JTEQuadState.QUAD_2;
@@ -759,7 +744,11 @@ public class JTEUI extends Pane {
                         break;
                 }
             }
-
+            for (int i = 0; i < gameBoardPane.getChildren().size(); i++) {
+                if (gameBoardPane.getChildren().get(i).getClass() == FlightCity.class) {
+                    gameBoardPane.getChildren().get(i).setVisible(false);
+                }
+            }
         } else if (quadNum == 3) {
             currentQuadrant = JTEQuadState.QUAD_3;
             gameBoardImg.setImage(q3Img);
@@ -778,6 +767,11 @@ public class JTEUI extends Pane {
                     case 4:
                         gameBoardPane.getChildren().get(i + 1).setVisible(false);
                         break;
+                }
+            }
+            for (int i = 0; i < gameBoardPane.getChildren().size(); i++) {
+                if (gameBoardPane.getChildren().get(i).getClass() == FlightCity.class) {
+                    gameBoardPane.getChildren().get(i).setVisible(false);
                 }
             }
         } else if (quadNum == 4) {
@@ -800,8 +794,12 @@ public class JTEUI extends Pane {
                         break;
                 }
             }
-        }
-        else if (quadNum == 5) {
+            for (int i = 0; i < gameBoardPane.getChildren().size(); i++) {
+                if (gameBoardPane.getChildren().get(i).getClass() == FlightCity.class) {
+                    gameBoardPane.getChildren().get(i).setVisible(false);
+                }
+            }
+        } else if (quadNum == 5) {
             currentQuadrant = JTEQuadState.FLIGHT;
             gameBoardImg.setImage(flightPlan);
 
@@ -819,15 +817,23 @@ public class JTEUI extends Pane {
                     case 4:
                         gameBoardPane.getChildren().get(i + 1).setVisible(false);
                         break;
-                    case 5:
-                        gameBoardPane.getChildren().get(i+1).setVisible(true);
-                        break;
+
+                }
+            }
+            for (int i = 0; i < gameBoardPane.getChildren().size(); i++) {
+                if (gameBoardPane.getChildren().get(i).getClass() == FlightCity.class) {
+                    gameBoardPane.getChildren().get(i).setVisible(true);
                 }
             }
         }
     }
 
     public void setPlayerPosition(City c, JTEPlayer player, String tempStr, double x, double y) {
+        if(c.hasAirport())
+            setFlightButton(true);
+        else
+            setFlightButton(false);        
+        
         if (!player.isCpu()) {
             player.getSpritePiece().setVisible(true);
         } else {
@@ -849,12 +855,24 @@ public class JTEUI extends Pane {
         drawLines(player);
     }
 
-    public void updatePlayerPosition(City c, JTEPlayer player, String tempStr, double x, double y) {
-        if (!player.isCpu()) {
+    public void updatePlayerPosition(City c, JTEPlayer player, String tempStr, String type, double x, double y, int mov) {
+        if(c.hasAirport())
+            setFlightButton(true);
+        else
+            setFlightButton(false);
+        
+        if (!player.isCpu() && type != "FLY") {
             player.getSpritePiece().setVisible(true);
         } else {
             changeQuadrant(c.getQuad());
         }
+        if(!player.getBeginTurn() && type.equals("SEA"))
+        {
+            gsm.changeTurn();
+            gsm.startTurn();
+        }
+        else{
+        player.setBeginTurn(false);
         clearLines();
         cityLabel.setText(tempStr);
         double xDest = x - offsetX;
@@ -869,13 +887,13 @@ public class JTEUI extends Pane {
         player.setCurrentCity(c);
         clearLines();
         drawLines(player);
-        player.makeMove();
+        player.makeMove(mov);
         System.out.println("Player: " + player.getPlayNum() + " moved to " + c.getName());
         translateTransition1.setOnFinished(new EventHandler<ActionEvent>() {
 
             @Override
             public void handle(ActionEvent event) {
-                dieLabel.setText("Dice Points: " + player.getDicePoints());    
+                dieLabel.setText("Dice Points: " + player.getDicePoints());
                 for (int i = 0; i < player.getCards().size(); i++) {
                     if (c.equals(player.getCards().get(i).getCity()) && c != player.getHomeCity()) {
                         player.getCardPane().getChildren().remove(i);
@@ -886,7 +904,7 @@ public class JTEUI extends Pane {
                 if (player.getCards().size() == 1 && c == player.getHomeCity()) {
                     player.getCardPane().getChildren().remove(0);
                     player.removeCard(player.getCards().get(0));
-                    player.setDicePoints(0);
+                    player.setDicePoints(1);
                     eventHandler.respondToGameOver(player);
                 }
 
@@ -895,12 +913,12 @@ public class JTEUI extends Pane {
                 } else if (player.getDicePoints() <= 0) {
                     gsm.changeTurn();
                     gsm.startTurn();
-                    drawLines(gsm.getGameInProgress().getCurrentPlayer());
+                    //drawLines(gsm.getGameInProgress().getCurrentPlayer());
                 }
 
             }
         });
-
+        }
     }
 
     public void setCurrentPlayer(JTEPlayer player) {
@@ -1067,4 +1085,13 @@ public class JTEUI extends Pane {
                 break;
         }
     }
+    
+    public void setFlightButton(boolean b)
+    {
+        if(b == true)
+            flightButton.setDisable(false);
+        else
+            flightButton.setDisable(true);
+    }        
+    
 }

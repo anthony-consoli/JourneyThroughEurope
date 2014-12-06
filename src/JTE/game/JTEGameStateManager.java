@@ -88,6 +88,7 @@ public class JTEGameStateManager {
 
     public void startTurn() {
         ui.clearLines();
+        gameInProgress.getCurrentPlayer().setBeginTurn(true);
         ui.changeQuadrant(gameInProgress.getCurrentPlayer().getCurrentCity().getQuad());
         gameInProgress.getCurrentPlayer().roll();
         System.out.println("Player: " + gameInProgress.getCurrentPlayer().getPlayNum() + " rolled a " + gameInProgress.getCurrentPlayer().getDicePoints());
@@ -100,7 +101,7 @@ public class JTEGameStateManager {
     }
 
     public void cpuTurn() {
-        
+        ui.clearLines();
         if (!gameInProgress.getCurrentPlayer().getCpuTrip().isEmpty()) {
             //System.out.println(gameInProgress.getCurrentPlayer().getCpuTrip().toString());
             City tmpCity = gameInProgress.getCurrentPlayer().getCpuTrip().poll();

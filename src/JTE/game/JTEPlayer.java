@@ -41,7 +41,7 @@ public class JTEPlayer {
     private int xOff = 0;
     private double transX;
     private double transY;
-    private boolean firstTurn;
+    private boolean beginTurn;
     
     public JTEPlayer(int playNum, ArrayList<Card>hand, boolean cmp)
     {
@@ -82,6 +82,7 @@ public class JTEPlayer {
         playerNumber = playNum;
         dicePoints = 0;
         rollAgain = false;
+        beginTurn = false;
         handOfCards = hand;
         homeCity = hand.get(0).getCity();
         currentCity = hand.get(0).getCity();
@@ -103,6 +104,16 @@ public class JTEPlayer {
             yOff +=60;
          }            
     }
+    
+    public boolean getBeginTurn()
+    {
+        return beginTurn;
+    }   
+    
+    public void setBeginTurn(boolean b)
+    {
+        beginTurn = b;
+    }        
     
     public AnchorPane getCardPane()
     {
@@ -128,9 +139,9 @@ public class JTEPlayer {
     {
         return dicePoints;
     }        
-    public void makeMove()
+    public void makeMove(int i)
     {
-        dicePoints--;
+        dicePoints = dicePoints - i;
     }        
     
     public Image loadSprite(String imageName) 

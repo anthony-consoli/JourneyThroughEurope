@@ -34,4 +34,14 @@ public class FlightCity extends Circle {
         sector = q;
 
     }
+    
+    public int getSector()
+    {
+        return sector;
+    }        
+    
+    public String getCityName()
+    {
+        return cityName;
+    }        
 }

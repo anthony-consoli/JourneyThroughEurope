@@ -21,6 +21,7 @@ public class City extends Circle {
     private double yPos;
     private int quad;
     private String color;
+    private boolean hasAirport;
     private ArrayList<City> landNeighbors;
     private ArrayList<City> seaNeighbors;
     
@@ -32,6 +33,7 @@ public class City extends Circle {
  {
      super(centerX, centerY, 6.0, Paint.valueOf("#FF0000"));
      cityName = name;
+     hasAirport = false;
      xPos = centerX;
      yPos = centerY;
      quad = q;
@@ -41,6 +43,16 @@ public class City extends Circle {
      
      
  }   
+ 
+ public void addAirport()
+ {
+     hasAirport = true;
+ }        
+ 
+ public boolean hasAirport()
+ {
+     return hasAirport;
+ }        
  
  public void addSeaNeighbors(ArrayList<City> sea)
  {
