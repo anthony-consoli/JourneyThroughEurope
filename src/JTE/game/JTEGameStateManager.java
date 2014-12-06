@@ -11,8 +11,9 @@ package JTE.game;
  */
 import JTE.file.JTEFileLoader;
 import JTE.ui.JTEUI;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
-import javafx.concurrent.Task;
 
 public class JTEGameStateManager {
 
@@ -90,8 +91,17 @@ public class JTEGameStateManager {
     public void startTurn() {
         ui.clearLines();
         gameInProgress.getCurrentPlayer().setBeginTurn(true);
+        if(gameInProgress.getCurrentPlayer().getCurrentCity().hasAirport())
+            ui.setFlightButton(true);
         ui.changeQuadrant(gameInProgress.getCurrentPlayer().getCurrentCity().getQuad());
-        gameInProgress.getCurrentPlayer().roll();
+        if(gameInProgress.getCurrentPlayer().isLoaded())
+        {  
+            gameInProgress.getCurrentPlayer().setLoaded(false);
+        }  
+        else
+        {    
+            gameInProgress.getCurrentPlayer().roll();
+        }
         System.out.println("Player: " + gameInProgress.getCurrentPlayer().getPlayNum() + " rolled a " + gameInProgress.getCurrentPlayer().getDicePoints());
         ui.updateDie(gameInProgress.getCurrentPlayer().getDicePoints());
         ui.setCurrentPlayer(gameInProgress.getCurrentPlayer());
@@ -133,18 +143,45 @@ public class JTEGameStateManager {
 
     }
 
-    public void loadPreviousGame(int num, int currNum, boolean[] cpu, String[] currentCities, ArrayList<ArrayList<String>> oldCards) {
+    public void loadPreviousGame(int num, int currNum, int currentDice, boolean[] cpu, String[] currentCities, ArrayList<ArrayList<String>> oldCards) {
         
         //USE DATA FROM TXT FILE TO START A PREVIOUS GAME
-        gameInProgress = new JTEGameData(num, currNum, cpu, currentCities, oldCards);
+        gameInProgress = new JTEGameData(num, currNum, currentDice, cpu, currentCities, oldCards);
         
         //THE GAME HAS RESUMED
         currentGameState = JTEGameState.GAME_IN_PROGRESS;
 
     }
 
-    public void saveCurrentGame() {
-
+    public void saveCurrentGame(int numPlayers, int currentNum, int currentDice, String[] typePlayer, String[] currentCities, int[] numCards, ArrayList<ArrayList<String>> hands) 
+    {
+        try
+        {
+        PrintWriter writer = new PrintWriter("data/gameSave.txt", "UTF-8");
+        writer.println(numPlayers);
+        writer.println(currentNum);
+        writer.println(currentDice);
+        
+        for(int i =0; i<numPlayers;i++)
+        {
+            String playerType = typePlayer[i];
+            writer.println(playerType);
+            String currentCity = currentCities[i];
+            writer.println(currentCity);
+            ArrayList<String> currentHand = hands.get(i);
+            writer.println(currentHand.size());
+            for(int k = 0; k<currentHand.size();k++)
+            {
+                writer.println(currentHand.get(k));
+            }    
+        }
+        writer.close();
+        }
+        catch(Exception e)
+        {
+            System.out.println(e.getMessage());
+        }    
+        
     }
 
     public void isMoveValid() {
@@ -152,7 +189,10 @@ public class JTEGameStateManager {
     }
 
     public boolean isGameInProgess() {
-        return isGameOn;
+        if(currentGameState == JTEGameState.GAME_IN_PROGRESS)
+            return true;
+        else
+            return false;
     }
 
     public void setGameOn() {

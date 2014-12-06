@@ -42,6 +42,7 @@ public class JTEPlayer {
     private double transX;
     private double transY;
     private boolean beginTurn;
+    private boolean loadedPlayer;
     
     public JTEPlayer(int playNum, ArrayList<Card>hand, boolean cmp)
     {
@@ -79,6 +80,7 @@ public class JTEPlayer {
                 break;
         }    
         
+        loadedPlayer = false;
         playerNumber = playNum;
         dicePoints = 0;
         rollAgain = false;
@@ -91,8 +93,6 @@ public class JTEPlayer {
         playerPiece = new ImageView(sprite);
         flagPiece = new ImageView(flag);
         cardPane = new AnchorPane();
-        double transX = 25;
-        double transY = 25;
         cpu = cmp;
         
         for(int i=0;i<handOfCards.size();i++)
@@ -240,6 +240,15 @@ public class JTEPlayer {
     public  ConcurrentLinkedQueue<City> getCpuTrip()
     {
         return cpuTrip;
+    }        
+    public boolean isLoaded()
+    {
+        return loadedPlayer;
+    }        
+    
+    public void setLoaded(boolean b)
+    {
+        loadedPlayer = b;
     }        
 }
 

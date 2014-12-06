@@ -278,7 +278,7 @@ public class JTEUI extends Pane {
         //CREATE SETUP PANE
         setupPane = new BorderPane();
         setupPane.setPadding(marginlessInsets);
-        setupPane.setStyle("-fx-background-color: #D2B48C");
+        setupPane.setStyle("-fx-background-color: linear-gradient(#61a2b1, #2A5058 );");
         cpuPlayer = new boolean[6];
         Arrays.fill(cpuPlayer, false);
 
@@ -445,10 +445,11 @@ public class JTEUI extends Pane {
 
         //CREATE ABOUT BUTTON AND HANDLER
         Button saveButton = new Button("Save");
-        aboutButton.setOnAction(new EventHandler<ActionEvent>() {
+        saveButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent e) {
-                eventHandler.respondToSwitchScreenRequest(JTEUIState.VIEW_ABOUT_STATE);
+                eventHandler.respondToSaveGameRequest(gsm.getGameInProgress().getPlayers());
+                
             }
         });
 
@@ -522,7 +523,7 @@ public class JTEUI extends Pane {
             ImageView tmpFlg = playerTmp.getFlagPiece();
             AnchorPane cardPane = playerTmp.getCardPane();
             playerTmp.setCurrentCity(playerTmp.getCurrentCity());
-            setPlayerPosition(playerTmp.getCurrentCity(), playerTmp, playerTmp.getHomeCity().getName(), playerTmp.getHomeCity().getX(), playerTmp.getHomeCity().getY());
+            setPlayerPosition(playerTmp.getCurrentCity(), playerTmp, playerTmp.getCurrentCity().getName(), playerTmp.getCurrentCity().getX(), playerTmp.getCurrentCity().getY());
             tmpFlg.setX(playerTmp.getHomeCity().getX() - offsetX + 10);
             tmpFlg.setY(playerTmp.getHomeCity().getY() - offsetY + 10);
             gameCardPane.getChildren().add(cardPane);
@@ -539,6 +540,7 @@ public class JTEUI extends Pane {
     private void initHistoryScreen() {
 
         historyPane = new BorderPane();
+        historyPane.setStyle("-fx-background-color: linear-gradient(#61a2b1, #2A5058 );");
         Label historyLabel = new Label("Game History");
         historyPane.setTop(historyLabel);
 
@@ -556,6 +558,7 @@ public class JTEUI extends Pane {
     private void initAboutScreen() {
 
         aboutPane = new BorderPane();
+        aboutPane.setStyle("-fx-background-color: linear-gradient(#61a2b1, #2A5058 );");
         Label aboutLabel = new Label("This is the About page!!!");
         aboutPane.setTop(aboutLabel);
 
@@ -801,6 +804,7 @@ public class JTEUI extends Pane {
             }
         } else if (quadNum == 5) {
             currentQuadrant = JTEQuadState.FLIGHT;
+            clearLines();
             gameBoardImg.setImage(flightPlan);
 
             for (int i = 0; i < cities.length; i++) {

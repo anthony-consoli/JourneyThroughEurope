@@ -282,7 +282,7 @@ public class JTEGameData {
      * @param cpu
      * @param oldCards
      */
-    public JTEGameData(int num, int currPlayNum, boolean[] cpu, String[] currentCities, ArrayList<ArrayList<String>> oldCards) {
+    public JTEGameData(int num, int currPlayNum, int currentDice, boolean[] cpu, String[] currentCities, ArrayList<ArrayList<String>> oldCards) {
 
         numPlayers = num;
         cpuOrPlayer = cpu;
@@ -489,6 +489,9 @@ public class JTEGameData {
             players.offer(players.poll());
         }
         currentPlayer = players.peek();
+        currentPlayer.setLoaded(true);
+        currentPlayer.setDicePoints(currentDice);
+        
     }
 
     public Stack<Card> shuffleDeck(Stack<Card> deck) {
