@@ -521,10 +521,10 @@ public class JTEUI extends Pane {
             ImageView tmpSpr = playerTmp.getSpritePiece();
             ImageView tmpFlg = playerTmp.getFlagPiece();
             AnchorPane cardPane = playerTmp.getCardPane();
-            playerTmp.setCurrentCity(playerTmp.getHomeCity());
-            setPlayerPosition(playerTmp.getHomeCity(), playerTmp, playerTmp.getHomeCity().getName(), playerTmp.getHomeCity().getX(), playerTmp.getHomeCity().getY());
-            tmpFlg.setX(playerTmp.getCurrentX() - offsetX + 10);
-            tmpFlg.setY(playerTmp.getCurrentY() - offsetY + 10);
+            playerTmp.setCurrentCity(playerTmp.getCurrentCity());
+            setPlayerPosition(playerTmp.getCurrentCity(), playerTmp, playerTmp.getHomeCity().getName(), playerTmp.getHomeCity().getX(), playerTmp.getHomeCity().getY());
+            tmpFlg.setX(playerTmp.getHomeCity().getX() - offsetX + 10);
+            tmpFlg.setY(playerTmp.getHomeCity().getY() - offsetY + 10);
             gameCardPane.getChildren().add(cardPane);
             cardPane.setVisible(false);
             gameBoardPane.getChildren().add(tmpSpr);

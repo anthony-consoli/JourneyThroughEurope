@@ -11,6 +11,7 @@ package JTE.game;
  */
 import JTE.file.JTEFileLoader;
 import JTE.ui.JTEUI;
+import java.util.ArrayList;
 import javafx.concurrent.Task;
 
 public class JTEGameStateManager {
@@ -128,11 +129,17 @@ public class JTEGameStateManager {
         currentGameState = JTEGameState.GAME_IN_PROGRESS;
 
         //START WITH PLAYER 1 TURN
-        currentPlayerState = JTETurnState.PLAYER_1;
+       // currentPlayerState = JTETurnState.PLAYER_1;
 
     }
 
-    public void loadPreviousGame() {
+    public void loadPreviousGame(int num, int currNum, boolean[] cpu, String[] currentCities, ArrayList<ArrayList<String>> oldCards) {
+        
+        //USE DATA FROM TXT FILE TO START A PREVIOUS GAME
+        gameInProgress = new JTEGameData(num, currNum, cpu, currentCities, oldCards);
+        
+        //THE GAME HAS RESUMED
+        currentGameState = JTEGameState.GAME_IN_PROGRESS;
 
     }
 

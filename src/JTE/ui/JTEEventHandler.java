@@ -9,12 +9,15 @@ package JTE.ui;
  *
  * @author Anthony
  */
-
 import JTE.game.City;
+import JTE.game.FlightCity;
 import JTE.game.JTEGameStateManager;
 import JTE.game.JTEPlayer;
 import JTE.ui.JTEUI.JTEUIState;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Scanner;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
@@ -26,101 +29,112 @@ import javafx.scene.paint.Paint;
 import javafx.stage.Stage;
 
 public class JTEEventHandler {
-    
-    
-    
+
     JTEUI ui;
-    
+
     ArrayList<int[]> flightDir;
-    
-    public JTEEventHandler(JTEUI initUI)
-    {
+
+    public JTEEventHandler(JTEUI initUI) {
         ui = initUI;
         flightDir = new ArrayList<int[]>();
-        flightDir.add(new int[]{2,4,5});
-        flightDir.add(new int[]{3,6,1});
-        flightDir.add(new int[]{2,6,4});
-        flightDir.add(new int[]{3,5,1});
-        flightDir.add(new int[]{4,6,1});
-        flightDir.add(new int[]{3,2,5});
+        flightDir.add(new int[]{2, 4, 5});
+        flightDir.add(new int[]{3, 6, 1});
+        flightDir.add(new int[]{2, 6, 4});
+        flightDir.add(new int[]{3, 5, 1});
+        flightDir.add(new int[]{4, 6, 1});
+        flightDir.add(new int[]{3, 2, 5});
     }
-    
-    public void respondToStartRequest()
-    {
-        
-    }
-    
 
-    
-    public void respondToSwitchScreenRequest(JTEUI.JTEUIState uiState)
-    {
+    public void respondToStartRequest() {
+
+    }
+
+    public void respondToSwitchScreenRequest(JTEUI.JTEUIState uiState) {
         ui.changeWorkspace(uiState);
-    }   
-    
-    public void respondToNewGameRequest(int p, boolean[] cpu)
-    {
+    }
+
+    public void respondToNewGameRequest(int p, boolean[] cpu) {
 
         JTEGameStateManager gsm = ui.getGSM();
         gsm.makeNewGame(p, cpu);
         ui.initGameScreen();
-    } 
-    
-    public void respondToCityRequest(City c, JTEPlayer player, String str, double x, double y)
-    {
-        if(player.getCurrentCity().getLandNeighbors().contains(c)) 
-        {
-            ui.updatePlayerPosition(c, player,str, "LAND", x, y,1);
-        }    
-        else if(player.getCurrentCity().getSeaNeighbors().contains(c))
-        {
-            ui.updatePlayerPosition(c, player,str, "SEA", x, y,1);
-        }    
-        
-    }        
-    
-    public void respondToLoadGameRequest()
-    {
-        
-    }   
-    
-    public void respondToSaveGameRequest()
-    {
-        
-    }   
-    
-    public void respondToExitRequest()
-    {
-        System.exit(0);
-    }   
-    
-    public void respondToFlightScreenRequest()
-    {
-        ui.changeQuadrant(5);
-    }        
-    
-    public void respondToFlightRequest(City c, JTEPlayer player, int currentSec, int destSec, String str, double x, double y)
-    {
-        int[] flights = flightDir.get(currentSec - 1);
-        if(currentSec == destSec && player.getDicePoints() > 1)
-        {
-            ui.updatePlayerPosition(c, player, str, "FLY", x, y,2);
+    }
+
+    public void respondToCityRequest(City c, JTEPlayer player, String str, double x, double y) {
+        if (player.getCurrentCity().getLandNeighbors().contains(c)) {
+            ui.updatePlayerPosition(c, player, str, "LAND", x, y, 1);
+        } else if (player.getCurrentCity().getSeaNeighbors().contains(c)) {
+            ui.updatePlayerPosition(c, player, str, "SEA", x, y, 1);
         }
-        else if(destSec == flights[0] || destSec == flights[1] || destSec == flights[2] && player.getDicePoints() > 3)
-        {
+
+    }
+
+    public void respondToLoadGameRequest() {
+        File file = new File("data/sampleLoad.txt");
+        try {
+
+            Scanner sc = new Scanner(file);
+            ArrayList<ArrayList<String>> hands = new ArrayList<ArrayList<String>>();
+            int numPlayers = Integer.parseInt(sc.next());
+            int currentPlayer = Integer.parseInt(sc.next());
+            String[] currentCities = new String[numPlayers];
+            boolean[] cpu = new boolean[numPlayers];
+
+            for (int i = 0; i < numPlayers; i++) {
+                String tmpCpu = sc.next();
+                if (tmpCpu.equals("HUMAN")) {
+                    cpu[i] = false;
+                } else {
+                    cpu[i] = true;
+                }
+                String currCity = sc.next();
+                currentCities[i] = currCity;
+
+                int numCards = Integer.parseInt(sc.next());
+                ArrayList<String> hand = new ArrayList<String>();
+                for (int k = 0; k < numCards; k++) {
+                    hand.add(sc.next());
+                }
+                hands.add(hand);
+            }
+            sc.close();
+            JTEGameStateManager gsm = ui.getGSM();
+            gsm.loadPreviousGame(numPlayers, currentPlayer, cpu, currentCities, hands);
+            ui.initGameScreen();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public void respondToSaveGameRequest() {
+
+    }
+
+    public void respondToExitRequest() {
+        System.exit(0);
+    }
+
+    public void respondToFlightScreenRequest() {
+        ui.changeQuadrant(5);
+    }
+
+    public void respondToFlightRequest(City c, JTEPlayer player, int currentSec, int destSec, String str, double x, double y) {
+        int[] flights = flightDir.get(currentSec - 1);
+        if (currentSec == destSec && player.getDicePoints() > 1) {
+            ui.updatePlayerPosition(c, player, str, "FLY", x, y, 2);
+        } else if (destSec == flights[0] || destSec == flights[1] || destSec == flights[2] && player.getDicePoints() > 3) {
             ui.updatePlayerPosition(c, player, str, "FLY", x, y, 4);
-        }    
-        else
-        {
+        } else {
             Stage newStage = new Stage();
             BorderPane comp = new BorderPane();
             Label nameField = new Label("You cannot make this flight!");
             Button rtnBtn = new Button("OK");
-            rtnBtn.setOnAction(new EventHandler<ActionEvent>(){
+            rtnBtn.setOnAction(new EventHandler<ActionEvent>() {
                 @Override
-                public void handle(ActionEvent e)
-                {
+                public void handle(ActionEvent e) {
                     newStage.close();
-                }        
+                }
             });
 
             comp.setTop(nameField);
@@ -129,27 +143,24 @@ public class JTEEventHandler {
             stageScene.getStylesheets().add(JTEUI.class.getResource("JTESplash.css").toExternalForm());
             stageScene.setFill(Paint.valueOf("#8C92AC"));
             newStage.setScene(stageScene);
-            newStage.show();            
-        }    
-        
-        
-    }        
-    
-    public void respondToGameOver(JTEPlayer p)
-    {
+            newStage.show();
+        }
+
+    }
+
+    public void respondToGameOver(JTEPlayer p) {
         ui.getGSM().setGameState(JTEGameStateManager.JTEGameState.GAME_OVER);
         Stage newStage = new Stage();
         VBox comp = new VBox();
         Label nameField = new Label("       Player " + p.getPlayNum() + " wins!");
         Button rtnBtn = new Button("Return To Splash Screen");
-        rtnBtn.setOnAction(new EventHandler<ActionEvent>(){
+        rtnBtn.setOnAction(new EventHandler<ActionEvent>() {
             @Override
-            public void handle(ActionEvent e)
-            {
+            public void handle(ActionEvent e) {
                 ui.initSplashScreen();
                 ui.getGSM().setGameState(JTEGameStateManager.JTEGameState.GAME_NOT_STARTED);
                 newStage.close();
-            }        
+            }
         });
         comp.getChildren().add(nameField);
         comp.getChildren().add(rtnBtn);
@@ -159,24 +170,21 @@ public class JTEEventHandler {
         newStage.setScene(stageScene);
         newStage.show();
     }
-    
-    
-    public void respondToBackRequest()
-    {
-        if(!ui.getGSM().isGameInProgess())
+
+    public void respondToBackRequest() {
+        if (!ui.getGSM().isGameInProgess()) {
             ui.changeWorkspace(JTEUIState.SPLASH_SCREEN_STATE);
-        else
+        } else {
             ui.changeWorkspace(JTEUIState.PLAY_GAME_STATE);
+        }
     }
-    
-    public void respondToHistoryRequest()
-    {
-        
-    }        
-    
-    public void respondToQuadrantRequest(int quadNum)
-    {
+
+    public void respondToHistoryRequest() {
+
+    }
+
+    public void respondToQuadrantRequest(int quadNum) {
         ui.changeQuadrant(quadNum);
-            
-    }        
+
+    }
 }
