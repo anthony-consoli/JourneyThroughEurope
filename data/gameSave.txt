@@ -1,23 +1,47 @@
-2
-1
+6
 4
+6
 HUMAN
+VITEBSK
+3
 WARSZAWA
-3
-SZCZECIN
-PLZEN
-FIRENZE
+BOLZANO
+SARAJEVO
 HUMAN
-LVOV
+NIS
 3
-KIJEV
+CHARKOV
+CATANIA
+NORRKOPING
+HUMAN
+VENEZIA
+3
 BOLOGNA
 KOBENHAVN
-Player: 1 rolled a 3
-Player: 1 moved to POZNAN
-Player: 1 moved to GDANSK
-Player: 1 moved to WARSZAWA
-Player: 2 rolled a 2
-Player: 2 moved to VINNICA
-Player: 2 moved to LVOV
-Player: 1 rolled a 4
+CLUJ-NAPOCA
+HUMAN
+SZCZECIN
+3
+SZCZECIN
+KRAKOV
+DUBROVNIK
+HUMAN
+KIJEV
+3
+KIJEV
+ROMA
+MALMO
+HUMAN
+ANCONA
+3
+ANCONA
+RIGA
+ZAGREB
+Player 1: moved to RIGA
+Player 1: moved to VITEBSK
+Player 2: moved to ODESSA
+Player 2: moved to GALATI
+Player 2: moved to BUCURESTI
+Player 2: moved to SOFIJA
+Player 2: moved to NIS
+Player 3: moved to VENEZIA

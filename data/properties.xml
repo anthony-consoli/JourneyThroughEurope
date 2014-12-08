@@ -7,7 +7,8 @@
     <property_list>    
         <property name="WINDOW_ICON"                value="JourneyWindowIcon.png"></property>
         <property name="SPLASH_SCREEN_TITLE_TEXT"   value="Journey Through Europe"></property>
-        <property name="WINDOW_WIDTH"               value="1150"></property>
+		<property name="BOX_IMG_NAME"				value="Game.jpg"></property>
+	   <property name="WINDOW_WIDTH"                value="1150"></property>
         <property name="WINDOW_HEIGHT"              value="860"></property>
         <property name="SPLASH_SCREEN_IMAGE_NAME"   value="splash.jpg"></property>
 		<property name="DIE1_IMG_NAME"          	value="die_1.jpg"></property>
@@ -28,6 +29,17 @@
 		<property name="FLAG_RED_IMG_NAME"			value="flag_red.png"></property>
 		<property name="FLAG_GREEN_IMG_NAME"	    value="flag_green.png"></property>
 		<property name="FLAG_WHITE_IMG_NAME"		value="flag_white.png"></property>
+		<property name="QUAD_1_IMG_NAME"		    value="gameplay_AC14.jpg"></property>
+		<property name="QUAD_3_IMG_NAME"		    value="gameplay_AC58.jpg"></property>
+	    <property name="QUAD_2_IMG_NAME"		    value="gameplay_DF14.jpg"></property>
+		<property name="QUAD_4_IMG_NAME"		    value="gameplay_DF58.jpg"></property>
+		<property name="NEIGHBORS_FILE_NAME"		value="cities.xml"></property>
+		<property name="NEIGHBORS_SCHEMA_NAME"		value="cities_schema.xsd"></property>
+		<property name="CITIES_FILE_NAME"		    value="JTE.xml"></property>
+		<property name="CITIES_SCHEMA_NAME"		    value="JTESchema.xsd"></property>	
+		<property name="SRS_TEXT_FILE_NAME"			value="SRSText.txt"></property>
+		<property name="SAVE_FILE_NAME"				value="gameSave.txt"></property>
+		<property name="FLIGHT_FILE_NAME"			value="flightPlan.txt"></property>	
 		<property name="DATA_PATH"                  value="./data/"></property>
         <property name="IMG_PATH"                   value="./img/"></property>
         <property name="LETTERS_FONT_FAMILY"        value="monospaced"></property>

@@ -77,6 +77,9 @@ public class JTEUI extends Pane {
         PLAYER_1, PLAYER_2, PLAYER_3, PLAYER_4, PLAYER_5, PLAYER_6;
     }
 
+    //
+    PropertiesManager props = PropertiesManager.getPropertiesManager();
+    
     // mainStage
     private Stage primaryStage;
 
@@ -151,6 +154,8 @@ public class JTEUI extends Pane {
 
     JTEGameStateManager gsm;
     JTEFileLoader fileLoader;
+    
+    
 
     File schemaFile = new File("data/JTESchema.xsd");
     //CITY XML FILE
@@ -164,6 +169,7 @@ public class JTEUI extends Pane {
     final double offsetX = 25;
     final double offsetY = 40;
 
+    
     Image die1 = loadImage("die_1.jpg");
     Image die2 = loadImage("die_2.jpg");
     Image die3 = loadImage("die_3.jpg");
@@ -527,6 +533,12 @@ public class JTEUI extends Pane {
                     tmp.setCursor(Cursor.HAND);
                 }
             });
+            tmp.setOnMouseDragEntered(new EventHandler<MouseEvent>() {
+                @Override
+                public void handle(MouseEvent mouseEvent) {
+                eventHandler.respondToCityRequest(tmp, currentPlayer, tmpStr, tmp.getX(), tmp.getY());
+                }
+            });            
         }
 
         //TESTING
@@ -566,34 +578,10 @@ public class JTEUI extends Pane {
             gameBoardPane.getChildren().add(tmpFlg);
             // allow the label to be dragged around.
             final Delta dragDelta = new Delta();
-            tmpSpr.setOnMousePressed(new EventHandler<MouseEvent>() {
+             tmpSpr.setOnDragDetected(new EventHandler<MouseEvent>() {
                 @Override
                 public void handle(MouseEvent mouseEvent) {
-                    // record a delta distance for the drag and drop operation.
-                    dragDelta.x = tmpSpr.getLayoutX() - mouseEvent.getSceneX();
-                    dragDelta.y = tmpSpr.getLayoutY() - mouseEvent.getSceneY();
-                    tmpSpr.setCursor(Cursor.MOVE);
-                }
-            });
-            tmpSpr.setOnMouseReleased(new EventHandler<MouseEvent>() {
-                @Override
-                public void handle(MouseEvent mouseEvent) {
-                    setPlayerPosition(playerTmp.getCurrentCity(), playerTmp, playerTmp.getCurrentCity().getName(), playerTmp.getCurrentCity().getX(), playerTmp.getCurrentCity().getY());
-
-                    tmpSpr.setCursor(Cursor.HAND);
-                }
-            });
-            tmpSpr.setOnMouseDragged(new EventHandler<MouseEvent>() {
-                @Override
-                public void handle(MouseEvent mouseEvent) {
-                    tmpSpr.setLayoutX(mouseEvent.getSceneX() + dragDelta.x);
-                    tmpSpr.setLayoutY(mouseEvent.getSceneY() + dragDelta.y);
-                }
-            });
-            tmpSpr.setOnMouseEntered(new EventHandler<MouseEvent>() {
-                @Override
-                public void handle(MouseEvent mouseEvent) {
-                    tmpSpr.setCursor(Cursor.HAND);
+                    tmpSpr.startFullDrag();
                 }
             });
         }
@@ -802,13 +790,14 @@ public class JTEUI extends Pane {
         });
 
         HBox gridBox = new HBox();
+        gridBox.setPrefSize(400, 400);
         ImageView flag = new ImageView();
         flag.setImage(imageName);
         flag.setFitWidth(25);
         flag.setPreserveRatio(true);
         flag.setSmooth(true);
         flag.setCache(true);
-        Label nameLabel = new Label("Name:");
+        Label nameLabel = new Label("       Name:");
         TextField nameText = new TextField();
         VBox nameVBox = new VBox();
         VBox imageVBox = new VBox();
@@ -821,6 +810,7 @@ public class JTEUI extends Pane {
         gridBox.getChildren().add(imageVBox);
         gridBox.getChildren().add(selectVBox);
         gridBox.getChildren().add(nameVBox);
+        
 
         return gridBox;
     }
@@ -1023,6 +1013,7 @@ public class JTEUI extends Pane {
             player.getSpritePiece().setVisible(true);
         } else {
             changeQuadrant(c.getQuad());
+            player.getSpritePiece().setVisible(true);
         }
         if (!player.getBeginTurn() && type.equals("SEA")) {
             gsm.changeTurn();

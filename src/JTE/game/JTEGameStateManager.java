@@ -96,6 +96,7 @@ public class JTEGameStateManager {
         ui.clearLines();
         gameInProgress.getCurrentPlayer().setBeginTurn(true);
         gameInProgress.getCurrentPlayer().setPreviousCity(null);
+        gameInProgress.getCurrentPlayer().getSpritePiece().setVisible(true);
         if(gameInProgress.getCurrentPlayer().getCurrentCity().hasAirport())
             ui.setFlightButton(true);
         ui.changeQuadrant(gameInProgress.getCurrentPlayer().getCurrentCity().getQuad());
