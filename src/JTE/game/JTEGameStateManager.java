@@ -11,9 +11,9 @@ package JTE.game;
  */
 import JTE.file.JTEFileLoader;
 import JTE.ui.JTEUI;
-import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 public class JTEGameStateManager {
 
@@ -46,6 +46,8 @@ public class JTEGameStateManager {
 
     private JTEPlayer current;
 
+    private ArrayList<String> gameHistory;
+    
     public JTEGameStateManager(JTEUI initUI) {
         ui = initUI;
 
@@ -54,6 +56,8 @@ public class JTEGameStateManager {
 
         //JTE HAS NOT BEEN STARTED YET
         gameInProgress = null;
+        
+        gameHistory = new ArrayList();
     }
 
     //ACCESSOR METHODS
@@ -91,6 +95,7 @@ public class JTEGameStateManager {
     public void startTurn() {
         ui.clearLines();
         gameInProgress.getCurrentPlayer().setBeginTurn(true);
+        gameInProgress.getCurrentPlayer().setPreviousCity(null);
         if(gameInProgress.getCurrentPlayer().getCurrentCity().hasAirport())
             ui.setFlightButton(true);
         ui.changeQuadrant(gameInProgress.getCurrentPlayer().getCurrentCity().getQuad());
@@ -101,8 +106,8 @@ public class JTEGameStateManager {
         else
         {    
             gameInProgress.getCurrentPlayer().roll();
+            gameInProgress.getCurrentPlayer().setCanFly(true);
         }
-        System.out.println("Player: " + gameInProgress.getCurrentPlayer().getPlayNum() + " rolled a " + gameInProgress.getCurrentPlayer().getDicePoints());
         ui.updateDie(gameInProgress.getCurrentPlayer().getDicePoints());
         ui.setCurrentPlayer(gameInProgress.getCurrentPlayer());
         if (gameInProgress.getCurrentPlayer().isCpu()) {
@@ -116,7 +121,8 @@ public class JTEGameStateManager {
         if (!gameInProgress.getCurrentPlayer().getCpuTrip().isEmpty()) {
             //System.out.println(gameInProgress.getCurrentPlayer().getCpuTrip().toString());
             City tmpCity = gameInProgress.getCurrentPlayer().getCpuTrip().poll();
-            ui.getEventHandler().respondToCityRequest(tmpCity, gameInProgress.getCurrentPlayer(), tmpCity.getName(), tmpCity.getX(), tmpCity.getY());
+            if (gameInProgress.getCurrentPlayer().getCurrentCity().getLandNeighbors().contains(tmpCity) || gameInProgress.getCurrentPlayer().getCurrentCity().getSeaNeighbors().contains(tmpCity) )
+                ui.getEventHandler().respondToCityRequest(tmpCity, gameInProgress.getCurrentPlayer(), tmpCity.getName(), tmpCity.getX(), tmpCity.getY());
             
         }
     }
@@ -175,6 +181,9 @@ public class JTEGameStateManager {
                 writer.println(currentHand.get(k));
             }    
         }
+        Iterator<String> strIt = gameHistory.iterator();
+        while(strIt.hasNext())
+            writer.println(strIt.next());
         writer.close();
         }
         catch(Exception e)
@@ -202,5 +211,29 @@ public class JTEGameStateManager {
     public void setGameState(JTEGameState state)
     {
         currentGameState = state;
+    }        
+    
+    public void addToHistory(String str)
+    {
+        gameHistory.add(str);
+    }        
+    
+    public ArrayList<String>getGameHistory()
+    {
+        return gameHistory;
+    }      
+    
+    public void setCardsVisible()
+    {
+        Iterator<JTEPlayer> it = gameInProgress.getPlayers().iterator();
+        while(it.hasNext())
+        {
+            JTEPlayer temp = it.next();
+            int numCards = temp.getCards().size();
+            for(Card c : temp.getCards())
+            {
+                c.getFrontImage().setVisible(true);
+            }    
+        }    
     }        
 }

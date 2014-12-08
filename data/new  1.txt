@@ -1,5 +1,0 @@
-final Timeline timeline = new Timeline();
-final KeyValue kv = new KeyValue(rectBasicTimeline.xProperty(), );
-final KeyFrame kf = new KeyFrame(Duration.millis(500), kv);
-timeline.getKeyFrames().add(kf);
-timeline.play();

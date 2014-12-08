@@ -32,6 +32,7 @@ public class JTEPlayer {
     private boolean cpu;
     private City currentCity;
     private City homeCity;
+    private City previousCity;
     private double currentX;
     private double currentY;
     private int playerNumber;
@@ -43,6 +44,7 @@ public class JTEPlayer {
     private double transY;
     private boolean beginTurn;
     private boolean loadedPlayer;
+    private boolean canFly;
     
     public JTEPlayer(int playNum, ArrayList<Card>hand, boolean cmp)
     {
@@ -88,16 +90,19 @@ public class JTEPlayer {
         handOfCards = hand;
         homeCity = hand.get(0).getCity();
         currentCity = hand.get(0).getCity();
+        previousCity = hand.get(0).getCity();
         currentX=0;
         currentY=0;
         playerPiece = new ImageView(sprite);
         flagPiece = new ImageView(flag);
         cardPane = new AnchorPane();
+        canFly = true;
         cpu = cmp;
         
         for(int i=0;i<handOfCards.size();i++)
         {
             ImageView tmpCard = handOfCards.get(i).getFrontImage();
+            tmpCard.setVisible(false);
             cardPane.getChildren().add(tmpCard);
             tmpCard.setX(xOff);
             tmpCard.setY(yOff);
@@ -123,6 +128,10 @@ public class JTEPlayer {
     public void roll()
     {
         dicePoints = (int)(Math.random()*6) + 1;
+        if(dicePoints == 6)
+            rollAgain = true;
+        else
+            rollAgain = false;
     }        
     
     public void setDicePoints(int i)
@@ -249,6 +258,31 @@ public class JTEPlayer {
     public void setLoaded(boolean b)
     {
         loadedPlayer = b;
+    }        
+    
+    public boolean getRollAgain()
+    {
+        return rollAgain;
+    }        
+    
+    public City getPreviousCity()
+    {
+        return previousCity;
+    }        
+    
+    public void setPreviousCity(City c)
+    {
+        previousCity = c;
+    }        
+    
+    public void setCanFly(boolean b)
+    {
+        canFly =b;
+    }        
+    
+    public boolean canFly()
+    {
+        return canFly;
     }        
 }
 

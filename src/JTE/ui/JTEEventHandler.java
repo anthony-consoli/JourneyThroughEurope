@@ -100,6 +100,8 @@ public class JTEEventHandler {
                 }
                 hands.add(hand);
             }
+            while (sc.hasNext())
+                ui.gsm.addToHistory(sc.nextLine());
             sc.close();
             JTEGameStateManager gsm = ui.getGSM();
             gsm.loadPreviousGame(numPlayers, currentPlayer, currentDice, cpu, currentCities, hands);
@@ -185,30 +187,27 @@ public class JTEEventHandler {
 
     public void respondToFlightRequest(City c, JTEPlayer player, int currentSec, int destSec, String str, double x, double y) {
         int[] flights = flightDir.get(currentSec - 1);
-        if (currentSec == destSec && player.getDicePoints() > 1) {
+        if(currentSec == 4 || currentSec == 3)
+        {
+            if (player.canFly() && destSec == flights[0] && player.getDicePoints() >= 4 || destSec == flights[1] && player.getDicePoints() >= 4 || destSec == flights[2] && player.getDicePoints() >= 4 ) 
+            {
+            player.setCanFly(false);
+            ui.updatePlayerPosition(c, player, str, "FLY", x, y, 4);
+            }
+            else
+                ui.showFlightError();
+        }
+        else if (player.canFly() && currentSec == destSec && player.getDicePoints() > 1) {
+            player.setCanFly(false);
             ui.updatePlayerPosition(c, player, str, "FLY", x, y, 2);
         } 
-        else if (destSec == flights[0] && player.getDicePoints() >= 4 || destSec == flights[1] && player.getDicePoints() >= 4 || destSec == flights[2] && player.getDicePoints() >= 4) {
+        else if (player.canFly() && destSec == flights[0] && player.getDicePoints() >= 4 || destSec == flights[1] && player.getDicePoints() >= 4 ) {
+            player.setCanFly(false);
             ui.updatePlayerPosition(c, player, str, "FLY", x, y, 4);
         } else {
-            Stage newStage = new Stage();
-            BorderPane comp = new BorderPane();
-            comp.setStyle("-fx-background-color: linear-gradient(#61a2b1, #2A5058 );");
-            Label nameField = new Label("You cannot make this flight!");
-            Button rtnBtn = new Button("OK");
-            rtnBtn.setOnAction(new EventHandler<ActionEvent>() {
-                @Override
-                public void handle(ActionEvent e) {
-                    newStage.close();
-                }
-            });
-
-            comp.setTop(nameField);
-            comp.setCenter(rtnBtn);
-            Scene stageScene = new Scene(comp, 330, 120);
-            stageScene.getStylesheets().add(JTEUI.class.getResource("JTESplash.css").toExternalForm());
-            newStage.setScene(stageScene);
-            newStage.show();
+            if(!player.isCpu())
+                ui.showFlightError();
+    
         }
 
     }
@@ -223,6 +222,7 @@ public class JTEEventHandler {
         rtnBtn.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent e) {
+                ui.gsm.getGameHistory().clear();
                 ui.getGSM().setGameState(JTEGameStateManager.JTEGameState.GAME_NOT_STARTED);
                 ui.initSplashScreen();
                 newStage.close();
