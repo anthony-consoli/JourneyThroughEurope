@@ -61,23 +61,26 @@ import javafx.util.Duration;
  */
 public class JTEUI extends Pane {
 
+    //ENUM TO DETERMINE THE STATE OF THE UI SCREEN
     public enum JTEUIState {
 
         SPLASH_SCREEN_STATE, GAME_SETUP_STATE, PLAY_GAME_STATE, VIEW_ABOUT_STATE, VIEW_HISTORY_STATE,
         VIEW_FLIGHT_STATE , VIEW_INFO_STATE
     }
 
+    //ENUM TO DETERMINE THE CURRENT QUADRANT OF THE GAME BOARD
     public enum JTEQuadState {
 
         QUAD_1, QUAD_2, QUAD_3, QUAD_4, FLIGHT;
     }
 
+    //ENUM TO DETERMINE PLAYER TURNS
     public enum JTEPlayerState {
 
         PLAYER_1, PLAYER_2, PLAYER_3, PLAYER_4, PLAYER_5, PLAYER_6;
     }
 
-    //
+    //GET THE PROPERTIES MANAGER
     PropertiesManager props = PropertiesManager.getPropertiesManager();
     
     // mainStage
@@ -156,7 +159,7 @@ public class JTEUI extends Pane {
     JTEFileLoader fileLoader;
     
     
-
+    //XML SCEMA
     File schemaFile = new File("data/JTESchema.xsd");
     //CITY XML FILE
     File citiesFile = new File("data/JTE.xml");
@@ -186,6 +189,9 @@ public class JTEUI extends Pane {
     private FlightCity[] flightCities;
     private HashMap<String, FlightCity> flightHash;
 
+    /**
+     * Default constructor for the JTE user interface.
+     */
     public JTEUI() {
         gsm = new JTEGameStateManager(this);
         eventHandler = new JTEEventHandler(this);
@@ -212,6 +218,7 @@ public class JTEUI extends Pane {
         String splashScreenImagePath = props
                 .getProperty(JTEPropertyType.SPLASH_SCREEN_IMAGE_NAME);
 
+        gsm.setGameState(JTEGameStateManager.JTEGameState.GAME_NOT_STARTED);
         splashPane = new BorderPane();
         splashPane.getStyleClass().add("pane");
 
@@ -564,19 +571,25 @@ public class JTEUI extends Pane {
 
         Iterator<JTEPlayer> it = gsm.getGameInProgress().getPlayers().iterator();
         while (it.hasNext()) {
+            
             JTEPlayer playerTmp = it.next();
             ImageView tmpSpr = playerTmp.getSpritePiece();
             ImageView tmpFlg = playerTmp.getFlagPiece();
             AnchorPane cardPane = playerTmp.getCardPane();
             playerTmp.setCurrentCity(playerTmp.getCurrentCity());
             setPlayerPosition(playerTmp.getCurrentCity(), playerTmp, playerTmp.getCurrentCity().getName(), playerTmp.getCurrentCity().getX(), playerTmp.getCurrentCity().getY());
+           
+
+            //ONLY WRITE THIS IF THE GAME IS NOT LOADING FROM SAVE
+           //gsm.addToHistory("Player " + playerTmp.getPlayNum() + ": originated in " + playerTmp.getCurrentCity().getName());
             tmpFlg.setX(playerTmp.getHomeCity().getX() - offsetX + 10);
             tmpFlg.setY(playerTmp.getHomeCity().getY() - offsetY + 10);
             gameCardPane.getChildren().add(cardPane);
             cardPane.setVisible(false);
             gameBoardPane.getChildren().add(tmpSpr);
             gameBoardPane.getChildren().add(tmpFlg);
-            // allow the label to be dragged around.
+            
+            // ALLOW THE LABEL TO BE DRAGGED AROUND
             final Delta dragDelta = new Delta();
              tmpSpr.setOnDragDetected(new EventHandler<MouseEvent>() {
                 @Override
@@ -600,8 +613,9 @@ public class JTEUI extends Pane {
         }
         
     }
-
-    private void initHistoryScreen() {
+    
+    //INITIALIZE THE HISTORY PAGE
+     private void initHistoryScreen() {
 
         historyPane = new BorderPane();
 
@@ -627,6 +641,7 @@ public class JTEUI extends Pane {
         sp.setContent(historyPane);
     }
 
+     //INITIALIZE THE INFO PAGE
     private void initInfoScreen() {
 
         infoPane = new BorderPane();
@@ -654,6 +669,7 @@ public class JTEUI extends Pane {
         loadCityInfo();
     }
 
+    //LOAD CITY INFORMATION INTO THE GAME
     public void loadCityInfo() {
         ArrayList<String> info = new ArrayList();
         File file = new File("data/SRSText.txt");
@@ -672,6 +688,7 @@ public class JTEUI extends Pane {
         }
     }
 
+    //THIS METHOD UPDATES THE HISTORY AS THE GAME PROGRESSES
     public void updateHistory() {
         historyBox.getChildren().clear();
         ArrayList<String> history = gsm.getGameHistory();
@@ -681,6 +698,7 @@ public class JTEUI extends Pane {
         }
     }
 
+    //INITIALIZE THE ABOUT SCREEN
     private void initAboutScreen() {
 
         aboutPane = new BorderPane();
@@ -703,7 +721,8 @@ public class JTEUI extends Pane {
         aboutPane.setBottom(backButton);
 
     }
-
+    
+    //INITIALIZE THE FLIGHT PLAN MENU
     public void initFlightPlan() {
 
         flightHash = gsm.getGameInProgress().getFlightCities();
@@ -734,14 +753,17 @@ public class JTEUI extends Pane {
 
     }
 
+    //THIS METHOD IS USED TO ACCESS THE GAME STATE MANAGER
     public JTEGameStateManager getGSM() {
         return gsm;
     }
 
+    //THIS METHOD RETURNS THE EVEN HANDLER
     public JTEEventHandler getEventHandler() {
         return eventHandler;
     }
 
+    //THIS METHOD IS USED TO CHANGE BETWEEN THE DIFFERENT WORKSPACES
     public void changeWorkspace(JTEUIState uiScreen) {
         switch (uiScreen) {
             case VIEW_ABOUT_STATE:
@@ -766,6 +788,7 @@ public class JTEUI extends Pane {
         }
     }
 
+    //THIS METHOD CREATES THE SETUP SELECTION PAGE BEFORE THE GAME BEGINS
     public HBox createSetupSelection(Image imageName, int i) {
 
         //CREATE RADIO BUTTONS FOR PLAYER/COMPUTER CHOICE
@@ -815,11 +838,13 @@ public class JTEUI extends Pane {
         return gridBox;
     }
 
+    
     public Image loadImage(String imageName) {
         Image img = new Image(ImgPath + imageName);
         return img;
     }
 
+    //THIS METHOD IS CALLED WHEN THE PLAYER WISHES TO SWITCH BETWEEN QUADRANTS
     public void changeQuadrant(int quadNum) {
         clearLines();
         if (quadNum == gsm.getGameInProgress().getCurrentPlayer().getCurrentCity().getQuad()) {
@@ -974,6 +999,7 @@ public class JTEUI extends Pane {
         }
     }
 
+    //THIS METHOD SETS THE PLAYER POSITION ON THE GAME BOARD
     public void setPlayerPosition(City c, JTEPlayer player, String tempStr, double x, double y) {
         if (c.hasAirport()) {
             setFlightButton(true);
@@ -1002,6 +1028,7 @@ public class JTEUI extends Pane {
         drawLines(player);
     }
 
+    //THIS METHOD UPDATES THE PLAYER POSITION SO CHANGES OCCUR IN THE UI
     public void updatePlayerPosition(City c, JTEPlayer player, String tempStr, String type, double x, double y, int mov) {
         if (c.hasAirport()) {
             setFlightButton(true);
@@ -1054,6 +1081,7 @@ public class JTEUI extends Pane {
                         player.getCardPane().getChildren().remove(0);
                         player.removeCard(player.getCards().get(0));
                         player.setDicePoints(1);
+                        gsm.addToHistory("Player " + player.getPlayNum() + ": returned " + c.getName() + " to the dealer");
                         eventHandler.respondToGameOver(player);
                     }
 
@@ -1078,6 +1106,7 @@ public class JTEUI extends Pane {
         }
     }
 
+    //THIS METHOD SETS THE CURRENT PLAYER IN THE GAME
     public void setCurrentPlayer(JTEPlayer player) {
         currentPlayer = player;
         Iterator<JTEPlayer> it = gsm.getGameInProgress().getPlayers().iterator();
@@ -1165,6 +1194,11 @@ public class JTEUI extends Pane {
 
     }
 
+    /**
+     * THIS METHOD IS USED TO SHOW THE CHANGING VALUE
+     * OF THE DIE TO THE USER ON THE SCREEN.
+     * @param i - NUMBER ON THE DIE
+     */
     public void updateDie(int i) {
         switch (i) {
             case 1:
@@ -1194,6 +1228,14 @@ public class JTEUI extends Pane {
         }
     }
 
+    /**
+     * This method is used to send the player back to a particular city.
+     * @param c - City Object
+     * @param player - Player being referenced
+     * @param tempStr - the name of the City
+     * @param x - X coord of the city
+     * @param y - Y coord of the city
+     */
     public void goBackToCity(City c, JTEPlayer player, String tempStr, double x, double y) {
         player.getSpritePiece().setVisible(true);
         clearLines();
@@ -1213,6 +1255,12 @@ public class JTEUI extends Pane {
         drawLines(player);
     }
 
+    
+    /**
+     * THIS METHOD CHANGES THE UI TO SHOW WHICH PLAYER IS CURRENTLY 
+     * ROLLING THE DICE AND MOVING.
+     * @param k - Player number.
+     */
     public void changeScreen(int k) {
 
         Iterator<JTEPlayer> it = gsm.getGameInProgress().getPlayers().iterator();
@@ -1253,6 +1301,11 @@ public class JTEUI extends Pane {
         }
     }
 
+    /**
+     * This method enables or disables the flight button depending on 
+     * the current players ability to take a flight at the current moment.
+     * @param b 
+     */
     public void setFlightButton(boolean b) {
         if (b == true) {
             flightButton.setDisable(false);
@@ -1260,7 +1313,10 @@ public class JTEUI extends Pane {
             flightButton.setDisable(true);
         }
     }
-
+    /**
+     *This method is used to simulate the card deal to each player. 
+     *
+     */
     public void dealCards() {
         Iterator<JTEPlayer> it = gsm.getGameInProgress().getPlayers().iterator();
         TranslateTransition[] transitions = new TranslateTransition[(gsm.getGameInProgress().getNumPlayers() * 3)];
@@ -1272,6 +1328,7 @@ public class JTEUI extends Pane {
             }
         }
 
+        //ITERATE THROUGH THE IMAGES AND SHOW THEM BEING DEALT IN THE UI
         Iterator<ImageView> it1 = cardImages.iterator();
         int j = 0;
         int delay = 0;
@@ -1392,6 +1449,9 @@ public class JTEUI extends Pane {
         }
     }
     
+    /**
+     * THIS METHOD WITH SHOW AN ERROR POP UP IF A FLIGHT CANNOT BE TAKEN
+     */
     public void showFlightError(){
             Stage newStage = new Stage();
             BorderPane comp = new BorderPane();
@@ -1415,7 +1475,7 @@ public class JTEUI extends Pane {
     
 }
 
-
+//CLASS TO CONTAIN DELTA INFORMATION
 class Delta {
 
     double x, y;

@@ -493,7 +493,11 @@ public class JTEGameData {
         currentPlayer.setDicePoints(currentDice);
         
     }
-
+    /**
+     * This method is used to simulate the shuffling of the City cards for use in the game.
+     * @param deck
+     * @return Stack of Card objects that represent the shuffled deck.
+     */
     public Stack<Card> shuffleDeck(Stack<Card> deck) {
         Card[] deckArray = new Card[deck.size()];
         Stack<Card> shuffledDeck = new Stack<Card>();

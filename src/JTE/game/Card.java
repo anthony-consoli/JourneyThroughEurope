@@ -43,21 +43,37 @@ public class Card {
         }
     }        
     
+    /**
+     * This method returns either Green, Yellow, or Red depending on the card.
+     * @return cardColor
+     */
     public String getColor()
     {
         return cardColor;
     }   
     
+    /**
+     * This method returns the city on a specific card.
+     * @return cardCity
+     */
     public City getCity()
     {
         return cardCity;
     }        
     
+    /**
+     * This method returns the String representation of the City Name
+     * @return cityName
+     */
     public String getCityName()
     {
         return cityName;
     }        
     
+    /**
+     * This method gets and returns the front image of a card
+     * @return frontImage - the imageView of a specific card.
+     */
     public ImageView getFrontImage()
     {
         return frontImage;

@@ -22,10 +22,21 @@ public class FlightCity extends Circle {
     private int sector;
     private String color;
 
+    
+    /** 
+     * Default constructor for FlightCity has no function
+     */
     public FlightCity() {
 
     }
-
+    /**
+     * Constructor for FlightCity which takes in the name, indices, and sector value of 
+     * cities with airports and constructs them.
+     * @param name
+     * @param centerX
+     * @param centerY
+     * @param q 
+     */
     public FlightCity(String name, double centerX, double centerY, int q) {
         super(centerX, centerY, 6.0, Paint.valueOf("#FF0000"));
         cityName = name;
@@ -35,11 +46,19 @@ public class FlightCity extends Circle {
 
     }
     
+    /**
+     * Getter method that returns the sector value of the city on the flight plan.
+     * @return an integer value of the sector of the city.
+     */
     public int getSector()
     {
         return sector;
     }        
     
+    /**
+     * Getter method that returns the name of a certain city.
+     * @return the City name
+     */
     public String getCityName()
     {
         return cityName;

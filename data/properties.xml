@@ -53,6 +53,7 @@
 		<property name="DEFAULT_LOAD_GAME"			value="Load Game"></property>
         <property name="DEFAULT_YES_TEXT"           value="Yes"></property>
         <property name="DEFAULT_NO_TEXT"            value="No"></property>
+        <property name="DEFAULT_OK_TEXT"            value="OK"></property>		
         <property name="DEFAULT_EXIT_TEXT"          value="Are you sure you wish to Quit?"></property>
     </property_list>
     <property_options_list>

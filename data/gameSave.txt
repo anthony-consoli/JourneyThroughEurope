@@ -1,47 +1,27 @@
-6
-4
-6
+2
+1
+1
 HUMAN
-VITEBSK
-3
-WARSZAWA
-BOLZANO
-SARAJEVO
-HUMAN
-NIS
-3
-CHARKOV
-CATANIA
-NORRKOPING
-HUMAN
-VENEZIA
-3
-BOLOGNA
-KOBENHAVN
-CLUJ-NAPOCA
-HUMAN
-SZCZECIN
+SALZBURG
 3
 SZCZECIN
-KRAKOV
-DUBROVNIK
+WROCLAW
+EDIRNE
 HUMAN
-KIJEV
-3
-KIJEV
-ROMA
-MALMO
-HUMAN
-ANCONA
-3
-ANCONA
-RIGA
-ZAGREB
-Player 1: moved to RIGA
-Player 1: moved to VITEBSK
-Player 2: moved to ODESSA
-Player 2: moved to GALATI
-Player 2: moved to BUCURESTI
-Player 2: moved to SOFIJA
-Player 2: moved to NIS
-Player 3: moved to VENEZIA
+SPLIT
+2
+LINZ
+SUNDSVALL
+Player 1: moved to POZNAN
+Player 1: moved to GDANSK
+Player 1: moved to WARSZAWA
+Player 2: moved to WIEN
+Player 1: moved to KRAKOV
+Player 1: moved to BRNO
+Player 1: moved to PRAHA
+Player 1: moved to LINZ
+Player 1: moved to SALZBURG
+Player 2: moved to BUDAPEST
+Player 2: moved to ZAGREB
+Player 2: moved to SPLIT
+Player 2: returned SPLIT to the dealer

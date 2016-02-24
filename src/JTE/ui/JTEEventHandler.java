@@ -36,6 +36,7 @@ public class JTEEventHandler {
 
     ArrayList<int[]> flightDir;
 
+    //DEFAULT CONSTRUCTOR FOR THE EVENT HANDLER THAT TAKES IN THE GAMES UI AS A PARAMETER
     public JTEEventHandler(JTEUI initUI) {
         ui = initUI;
         flightDir = new ArrayList<int[]>();
@@ -62,6 +63,16 @@ public class JTEEventHandler {
         ui.initGameScreen();
     }
 
+    
+    /**
+     * THIS METHOD RESPONDS TO A CLICK ON A CERTAIN CITY AND VERIFIES THAT IT IS A LEAGAL ACTION
+     * BY CHECKING LAND AND SEA NEIGHBORS BEFORE UPDATING PLAYER POSITION.
+     * @param c
+     * @param player
+     * @param str
+     * @param x
+     * @param y 
+     */
     public void respondToCityRequest(City c, JTEPlayer player, String str, double x, double y) {
         if (player.getCurrentCity().getLandNeighbors().contains(c)) {
             ui.updatePlayerPosition(c, player, str, "LAND", x, y, 1);
@@ -71,6 +82,10 @@ public class JTEEventHandler {
 
     }
 
+    /**
+     *THIS METHOD IS USED TO SCAN THE PREVIOUSLY SAVED DATA FILE TO LOAD THAT SAVED GAME. 
+     *THE SAVE DATA FILE MUST RESIDE WITHIN THE DATA FOLDER.
+     */
     public void respondToLoadGameRequest() {
         File file = new File("data/gameSave.txt");
         try {
@@ -112,6 +127,11 @@ public class JTEEventHandler {
 
     }
 
+    /**
+     * THIS METHOD TAKES IN THE LINKEDQUEUE OF THE JTEPLAYER AND WRITE THE 
+     * INFORMATION NEEDED TO CORRECTLY SAVE A GAME. 
+     * @param p 
+     */
     public void respondToSaveGameRequest(ConcurrentLinkedQueue<JTEPlayer> p) 
     {
         ArrayList<ArrayList<String>> hands = new ArrayList<ArrayList<String>>();
@@ -177,14 +197,33 @@ public class JTEEventHandler {
             newStage.show();
     }
 
+    /**
+     * THIS METHOD WILL CLOSE THE GAME AND EXIT THE PROGRAM
+     * 
+     */
     public void respondToExitRequest() {
         System.exit(0);
     }
 
+    /**
+     * THIS METHOD WILL CAUSE THE FLIGHT SCREEN TO APPEAR
+     * 
+     */
     public void respondToFlightScreenRequest() {
         ui.changeQuadrant(5);
     }
 
+    /**
+     * 
+     * THIS METHOD IS USED TO RESPOND TO THE PLAYERS REQUEST TO MAKE ANY FLIGHT IN THE GAME.
+     * @param c
+     * @param player
+     * @param currentSec
+     * @param destSec
+     * @param str
+     * @param x
+     * @param y 
+     */
     public void respondToFlightRequest(City c, JTEPlayer player, int currentSec, int destSec, String str, double x, double y) {
         int[] flights = flightDir.get(currentSec - 1);
         if(currentSec == 4 || currentSec == 3)
@@ -212,8 +251,12 @@ public class JTEEventHandler {
 
     }
 
+    /**
+     * THIS METHOD IS CALLED WHEN ANY PLAYER HAS REACHED THE END OF THE GAME.
+     * @param p - WINNING PLAYER
+     */
     public void respondToGameOver(JTEPlayer p) {
-        ui.getGSM().setGameState(JTEGameStateManager.JTEGameState.GAME_OVER);
+       // ui.getGSM().setGameState(JTEGameStateManager.JTEGameState.GAME_OVER);
         Stage newStage = new Stage();
         VBox comp = new VBox();
         comp.setStyle("-fx-background-color: linear-gradient(#61a2b1, #2A5058 );");
@@ -223,7 +266,6 @@ public class JTEEventHandler {
             @Override
             public void handle(ActionEvent e) {
                 ui.gsm.getGameHistory().clear();
-                ui.getGSM().setGameState(JTEGameStateManager.JTEGameState.GAME_NOT_STARTED);
                 ui.initSplashScreen();
                 newStage.close();
             }
@@ -236,6 +278,11 @@ public class JTEEventHandler {
         newStage.show();
     }
 
+    /**
+     * THIS METHOD GIVES FUNCTIONALITY TO THE BACK BUTTON. 
+     * IF THE GAME IS IN PROGRESS THE BACK BUTTON WILL GO TO THE GAME BOARD.
+     * IF THE GAME IS NOT IN PROGRESS THE BACK BUTTON WILL LEAD TO THE SPLASH SCREEN
+     */
     public void respondToBackRequest() {
         if (!ui.getGSM().isGameInProgess()) {
             ui.changeWorkspace(JTEUIState.SPLASH_SCREEN_STATE);
@@ -248,6 +295,10 @@ public class JTEEventHandler {
 
     }
 
+    /**
+     * THIS METHOD IS CALLED WHEN THE PLAYER CLICKS ON A NEW QUADRANT OF THE GAME BOARD.
+     * @param quadNum 
+     */
     public void respondToQuadrantRequest(int quadNum) {
         ui.changeQuadrant(quadNum);
 
